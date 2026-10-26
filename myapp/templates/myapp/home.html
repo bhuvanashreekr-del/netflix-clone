@@ -1,89 +1,215 @@
 {% extends 'myapp/base.html' %}
 
 {% block content %}
-<section class="hero-section">
-  <div class="status-pill">
-    <span class="pulse-dot"></span>
-    Available for Projects &amp; Web Development
-  </div>
+<!-- Billboard / Hero Section -->
+{% if featured %}
+<section class="billboard-container">
+  <div class="billboard-bg" style="background-image: url('{{ featured.backdrop_url }}');"></div>
+  <div class="billboard-vignette"></div>
 
-  <h1 class="hero-title">
-    Hi, I'm <span class="gradient-text">Bhuvanashree</span> 👋
-  </h1>
+  <div class="billboard-content">
+    {% if featured.is_netflix_original %}
+      <div class="original-badge">
+        <span style="font-size: 1.4rem;">🔴</span> STREAMFLIX ORIGINAL
+      </div>
+    {% endif %}
 
-  <p class="hero-subtitle">
-    Aspiring Python &amp; Django Full-Stack Developer. Building clean, scalable, database-driven web applications and modern interactive web experiences.
-  </p>
+    <h1 class="billboard-title">{{ featured.title }}</h1>
 
-  <div class="cta-group">
-    <a href="{% url 'contact' %}" class="btn btn-primary" id="btn-hero-contact">Get In Touch</a>
-    <a href="{% url 'about' %}" class="btn btn-secondary" id="btn-hero-about">Explore My Journey</a>
-    <a href="https://github.com/bhuvanashreekr-del" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
-      View GitHub Repositories ↗
-    </a>
+    <div class="meta-row">
+      <span class="match-score">{{ featured.match_percentage }}% Match</span>
+      <span>{{ featured.release_year }}</span>
+      <span class="rating-badge">{{ featured.age_rating }}</span>
+      <span>{{ featured.duration }}</span>
+      <span class="quality-badge">{{ featured.quality }}</span>
+    </div>
+
+    <p class="billboard-synopsis">{{ featured.description }}</p>
+
+    <div class="billboard-actions">
+      <button class="btn-netflix btn-play" onclick="openVideoModal('{{ featured.trailer_youtube_id }}')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+        </svg>
+        Play
+      </button>
+
+      <button class="btn-netflix btn-info" onclick="openDetailModal({{ featured.id }})">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        More Info
+      </button>
+
+      <button class="btn-netflix btn-watchlist-toggle {% if featured.id in watchlist_ids %}active{% endif %}" onclick="toggleWatchlist({{ featured.id }}, this)">
+        {% if featured.id in watchlist_ids %}✓ In List{% else %}+ My List{% endif %}
+      </button>
+    </div>
   </div>
 </section>
+{% endif %}
 
-<!-- Stats Grid -->
-<div class="stats-grid">
-  <div class="stat-card">
-    <div class="stat-number">3+</div>
-    <div class="stat-label">Dynamic Django Pages</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-number">100%</div>
-    <div class="stat-label">Python Backend Architecture</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-number">SQLite</div>
-    <div class="stat-label">Model Database Storage</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-number">Render</div>
-    <div class="stat-label">Production Cloud Ready</div>
-  </div>
-</div>
+<!-- Rails Container -->
+<div class="rails-wrapper">
 
-<!-- Core Tech Stack -->
-<div class="section-header">
-  <span class="section-tag">// Core Technologies</span>
-  <h2 class="section-title">My Tech Stack &amp; Tooling</h2>
-</div>
+  <!-- Top 10 in India Today -->
+  {% if top_10_movies %}
+  <section class="rail-section">
+    <h2 class="rail-title">Top 10 in India Today 🔥</h2>
+    <div class="rail-container">
+      <button class="slider-arrow left" data-slider="slider-top10">‹</button>
+      <div class="rail-slider" id="slider-top10">
+        {% for movie in top_10_movies %}
+        <div class="top10-card-wrapper" onclick="openDetailModal({{ movie.id }})">
+          <span class="top10-rank">{{ forloop.counter }}</span>
+          <div class="top10-poster">
+            <img src="{{ movie.thumbnail_url }}" alt="{{ movie.title }}" loading="lazy">
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <button class="slider-arrow right" data-slider="slider-top10">›</button>
+    </div>
+  </section>
+  {% endif %}
 
-<div class="tech-badges-grid">
-  <div class="tech-badge">🐍 Python 3.15</div>
-  <div class="tech-badge">🌐 Django 6.1</div>
-  <div class="tech-badge">🎨 HTML5 &amp; Modern CSS3</div>
-  <div class="tech-badge">⚡ JavaScript (ES6+)</div>
-  <div class="tech-badge">🗄️ SQLite &amp; Django ORM</div>
-  <div class="tech-badge">🐙 Git &amp; GitHub</div>
-  <div class="tech-badge">🚀 Gunicorn &amp; WhiteNoise</div>
-  <div class="tech-badge">☁️ Render Cloud Hosting</div>
-</div>
+  <!-- Trending Now -->
+  {% if trending_movies %}
+  <section class="rail-section">
+    <h2 class="rail-title">Trending Now</h2>
+    <div class="rail-container">
+      <button class="slider-arrow left" data-slider="slider-trending">‹</button>
+      <div class="rail-slider" id="slider-trending">
+        {% for movie in trending_movies %}
+        <div class="movie-card" onclick="openDetailModal({{ movie.id }})">
+          <img src="{{ movie.backdrop_url }}" alt="{{ movie.title }}" loading="lazy">
+          {% if movie.is_netflix_original %}
+            <span class="card-badge">N</span>
+          {% endif %}
+          <div class="card-hover-info">
+            <div class="hover-actions">
+              <button class="action-circle-btn play" onclick="event.stopPropagation(); openVideoModal('{{ movie.trailer_youtube_id }}')">▶</button>
+              <button class="action-circle-btn" onclick="event.stopPropagation(); toggleWatchlist({{ movie.id }}, this)">
+                {% if movie.id in watchlist_ids %}✓{% else %}+{% endif %}
+              </button>
+              <button class="action-circle-btn chevron" onclick="event.stopPropagation(); openDetailModal({{ movie.id }})">⌵</button>
+            </div>
+            <div class="hover-title">{{ movie.title }}</div>
+            <div class="hover-meta">
+              <span class="match-score">{{ movie.match_percentage }}% Match</span>
+              <span class="rating-badge">{{ movie.age_rating }}</span>
+              <span>{{ movie.duration }}</span>
+            </div>
+            <div class="hover-genres">
+              {% for g in movie.genres.all %}{{ g.name }}{% if not forloop.last %} • {% endif %}{% endfor %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <button class="slider-arrow right" data-slider="slider-trending">›</button>
+    </div>
+  </section>
+  {% endif %}
 
-<!-- What I've Built -->
-<div class="section-header">
-  <span class="section-tag">// Key Capabilities</span>
-  <h2 class="section-title">What Powers This Website</h2>
-</div>
+  <!-- Sci-Fi Blockbusters -->
+  {% if scifi_movies %}
+  <section class="rail-section">
+    <h2 class="rail-title">Sci-Fi &amp; Cosmic Adventures 🚀</h2>
+    <div class="rail-container">
+      <button class="slider-arrow left" data-slider="slider-scifi">‹</button>
+      <div class="rail-slider" id="slider-scifi">
+        {% for movie in scifi_movies %}
+        <div class="movie-card" onclick="openDetailModal({{ movie.id }})">
+          <img src="{{ movie.backdrop_url }}" alt="{{ movie.title }}" loading="lazy">
+          <div class="card-hover-info">
+            <div class="hover-actions">
+              <button class="action-circle-btn play" onclick="event.stopPropagation(); openVideoModal('{{ movie.trailer_youtube_id }}')">▶</button>
+              <button class="action-circle-btn" onclick="event.stopPropagation(); toggleWatchlist({{ movie.id }}, this)">
+                {% if movie.id in watchlist_ids %}✓{% else %}+{% endif %}
+              </button>
+              <button class="action-circle-btn chevron" onclick="event.stopPropagation(); openDetailModal({{ movie.id }})">⌵</button>
+            </div>
+            <div class="hover-title">{{ movie.title }}</div>
+            <div class="hover-meta">
+              <span class="match-score">{{ movie.match_percentage }}% Match</span>
+              <span class="rating-badge">{{ movie.age_rating }}</span>
+              <span>{{ movie.duration }}</span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <button class="slider-arrow right" data-slider="slider-scifi">›</button>
+    </div>
+  </section>
+  {% endif %}
 
-<div class="cards-grid">
-  <div class="feature-card">
-    <div class="card-icon">⚡</div>
-    <h3>Django MVT Architecture</h3>
-    <p>Organized modular web structure utilizing Model-View-Template architecture, URL routing, and dynamic template rendering with custom context.</p>
-  </div>
+  <!-- Anime & Animation -->
+  {% if anime_list %}
+  <section class="rail-section">
+    <h2 class="rail-title">Anime Spotlight ⚡</h2>
+    <div class="rail-container">
+      <button class="slider-arrow left" data-slider="slider-anime">‹</button>
+      <div class="rail-slider" id="slider-anime">
+        {% for movie in anime_list %}
+        <div class="movie-card" onclick="openDetailModal({{ movie.id }})">
+          <img src="{{ movie.backdrop_url }}" alt="{{ movie.title }}" loading="lazy">
+          <div class="card-hover-info">
+            <div class="hover-actions">
+              <button class="action-circle-btn play" onclick="event.stopPropagation(); openVideoModal('{{ movie.trailer_youtube_id }}')">▶</button>
+              <button class="action-circle-btn" onclick="event.stopPropagation(); toggleWatchlist({{ movie.id }}, this)">
+                {% if movie.id in watchlist_ids %}✓{% else %}+{% endif %}
+              </button>
+              <button class="action-circle-btn chevron" onclick="event.stopPropagation(); openDetailModal({{ movie.id }})">⌵</button>
+            </div>
+            <div class="hover-title">{{ movie.title }}</div>
+            <div class="hover-meta">
+              <span class="match-score">{{ movie.match_percentage }}% Match</span>
+              <span class="rating-badge">{{ movie.age_rating }}</span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <button class="slider-arrow right" data-slider="slider-anime">›</button>
+    </div>
+  </section>
+  {% endif %}
 
-  <div class="feature-card">
-    <div class="card-icon">📨</div>
-    <h3>Interactive Contact System</h3>
-    <p>Real-time form submission secured with Django CSRF token, server-side data validation, and persistent storage in SQLite via Django models.</p>
-  </div>
+  <!-- Action & Thrillers -->
+  {% if action_movies %}
+  <section class="rail-section">
+    <h2 class="rail-title">Action &amp; Suspense Thrillers 💥</h2>
+    <div class="rail-container">
+      <button class="slider-arrow left" data-slider="slider-action">‹</button>
+      <div class="rail-slider" id="slider-action">
+        {% for movie in action_movies %}
+        <div class="movie-card" onclick="openDetailModal({{ movie.id }})">
+          <img src="{{ movie.backdrop_url }}" alt="{{ movie.title }}" loading="lazy">
+          <div class="card-hover-info">
+            <div class="hover-actions">
+              <button class="action-circle-btn play" onclick="event.stopPropagation(); openVideoModal('{{ movie.trailer_youtube_id }}')">▶</button>
+              <button class="action-circle-btn" onclick="event.stopPropagation(); toggleWatchlist({{ movie.id }}, this)">
+                {% if movie.id in watchlist_ids %}✓{% else %}+{% endif %}
+              </button>
+              <button class="action-circle-btn chevron" onclick="event.stopPropagation(); openDetailModal({{ movie.id }})">⌵</button>
+            </div>
+            <div class="hover-title">{{ movie.title }}</div>
+            <div class="hover-meta">
+              <span class="match-score">{{ movie.match_percentage }}% Match</span>
+              <span class="rating-badge">{{ movie.age_rating }}</span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <button class="slider-arrow right" data-slider="slider-action">›</button>
+    </div>
+  </section>
+  {% endif %}
 
-  <div class="feature-card">
-    <div class="card-icon">🚀</div>
-    <h3>Production Cloud Deployment</h3>
-    <p>Configured with WSGI/Gunicorn, WhiteNoise compressed static assets, environment security, and streamlined for one-click hosting on Render.</p>
-  </div>
 </div>
 {% endblock %}

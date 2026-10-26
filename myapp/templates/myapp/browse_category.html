@@ -1,0 +1,38 @@
+{% extends 'myapp/base.html' %}
+
+{% block content %}
+<div style="padding: 100px 4% 40px;">
+  <h1 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 24px;">{{ category_name }}</h1>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px;">
+    {% for movie in movies %}
+    <div class="movie-card" style="height: 140px; min-width: auto; flex: auto;" onclick="openDetailModal({{ movie.id }})">
+      <img src="{{ movie.backdrop_url }}" alt="{{ movie.title }}" loading="lazy">
+      {% if movie.is_netflix_original %}
+        <span class="card-badge">N</span>
+      {% endif %}
+      <div class="card-hover-info">
+        <div class="hover-actions">
+          <button class="action-circle-btn play" onclick="event.stopPropagation(); openVideoModal('{{ movie.trailer_youtube_id }}')">▶</button>
+          <button class="action-circle-btn" onclick="event.stopPropagation(); toggleWatchlist({{ movie.id }}, this)">
+            {% if movie.id in watchlist_ids %}✓{% else %}+{% endif %}
+          </button>
+          <button class="action-circle-btn chevron" onclick="event.stopPropagation(); openDetailModal({{ movie.id }})">⌵</button>
+        </div>
+        <div class="hover-title">{{ movie.title }}</div>
+        <div class="hover-meta">
+          <span class="match-score">{{ movie.match_percentage }}% Match</span>
+          <span class="rating-badge">{{ movie.age_rating }}</span>
+          <span>{{ movie.duration }}</span>
+        </div>
+        <div class="hover-genres">
+          {% for g in movie.genres.all %}{{ g.name }}{% if not forloop.last %} • {% endif %}{% endfor %}
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <p style="color: var(--netflix-gray);">No titles found in this category.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
