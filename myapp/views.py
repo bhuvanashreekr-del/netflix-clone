@@ -196,9 +196,21 @@ def add_review_api(request, movie_id):
         return JsonResponse({'error': 'POST required'}, status=400)
 
     movie = get_object_or_404(Movie, id=movie_id)
-    user_name = request.POST.get('user_name', '').strip() or 'Movie Lover'
-    rating = int(request.POST.get('rating', 5))
-    comment = request.POST.get('comment', '').strip()
+    data = {}
+    if request.content_type == 'application/json':
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+        except Exception:
+            data = {}
+    else:
+        data = request.POST
+
+    user_name = str(data.get('user_name', '')).strip() or 'Movie Lover'
+    try:
+        rating = int(data.get('rating', 5))
+    except (ValueError, TypeError):
+        rating = 5
+    comment = str(data.get('comment', '')).strip()
 
     if not comment:
         return JsonResponse({'error': 'Comment cannot be empty'}, status=400)
