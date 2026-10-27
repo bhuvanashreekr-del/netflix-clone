@@ -1,136 +1,141 @@
-# 🎬 StreamFlix — AI-Powered Full-Stack Netflix Web Application
-
-[![Python](https://img.shields.io/badge/Python-3.15%20%7C%203.12-3776AB?logo=python&logoColor=white)](https://python.org)
-[![Django](https://img.shields.io/badge/Django-6.1-092E20?logo=django&logoColor=white)](https://djangoproject.com)
-[![AI Engine](https://img.shields.io/badge/AI-FlixAI%20Copilot-9333EA?logo=openai&logoColor=white)](#)
-[![Netflix Design](https://img.shields.io/badge/Design-Authentic%20Netflix-E50914?logo=netflix&logoColor=white)](#)
-[![Deployment](https://img.shields.io/badge/Deploy-Render-46E3B7?logo=render&logoColor=white)](https://render.com)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-
-A high-performance, full-stack **Netflix Web Application Clone & AI Cinema Concierge** built with **Python**, **Django 6**, **Vanilla CSS**, **JavaScript**, and **FlixAI Intelligent Recommendation Engine**. Features an authentic cinematic dark UI, dynamic hero billboard, horizontal sliding carousels, **Top 10 Today** numbered cards, video trailer player modal, session-backed interactive **"My List" watchlist**, live search, community ratings/reviews, and an **interactive AI movie concierge (FlixAI)**.
+# 🍿 StreamFlix — Personal Web Application & AI Diagnostics Platform
+> **Final Assessment in Software Development**  
+> **Student:** Bhuvanashree  
+> **Repository:** [https://github.com/bhuvanashreekr-del/netflix-clone](https://github.com/bhuvanashreekr-del/netflix-clone)  
+> **Live Website (HTTPS):** [https://streamflix-app.onrender.com](https://streamflix-app.onrender.com)  
 
 ---
 
+## 📑 Project Overview & Assessment Task Title
+**Task Title:** *StreamFlix: A Resilient Cloud-Deployed Web Platform with Dual-Database Architecture (SQL & MongoDB), Intelligent AI Support Concierge, and System Diagnostics.*
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/bhuvanashreekr-del/netflix-clone)
-
-
-## 🌟 Architecture Breakdown: Frontend, Backend & AI
-
-### 1. 🎨 Frontend Architecture
-- **Authentic Netflix Design System**: Custom vanilla CSS with iconic Netflix Crimson (`#E50914`) and deep charcoal (`#141414`), typography with Google Fonts (*Plus Jakarta Sans* and *Bebas Neue*).
-- **Sticky Glassmorphic Navbar**: Dynamically transitions from a subtle top gradient to solid black upon scrolling down.
-- **Top Billboard Hero**: Massive full-width backdrop with dual-axis vignette gradients, *"StreamFlix Original"* badge, match percentage, age maturity badge, synopsis, and action buttons (`▶ Play`, `ℹ More Info`, `+ My List`).
-- **Top 10 in India Today**: Giant outlined 3D numbers (1 through 10) flanking each movie poster, replicating Netflix's most iconic row.
-- **Dynamic Category Rails**: *Trending Now*, *Sci-Fi & Cosmic Adventures*, *Anime Spotlight*, and *Action Thrillers* with left & right scroll arrows (`‹` and `›`).
-- **Interactive Card Hover Expansion**: Cards scale smoothly to `1.18x` with an elevated z-index, revealing quick action buttons (Play, My List toggle, Info chevron), Match %, Age Rating (`U/A 16+`, `A 18+`), Duration, and Genre chips.
-- **HD Video Trailer Player Modal**: Full-screen modal overlay embedding official trailers.
-
-### 2. ⚙️ Backend Architecture
-- **Django 6 MVT Architecture**: Clean separation of Models, Views, and Templates with custom context processors and session management.
-- **Database Models (SQLite / PostgreSQL)**:
-  - `Genre`: Normalized genre taxonomy (Action, Sci-Fi, Anime, Thriller, Drama, etc.).
-  - `Movie`: Titles, taglines, synopsis, content_type ('movie' vs 'series'), year, duration, rating, match %, age rating, quality ('4K Ultra HD'), backdrop and poster URLs, YouTube trailer ID, cast, and director.
-  - `Watchlist`: Session-backed bookmarking allowing users to add/remove titles to their personal "My List" with zero login friction.
-  - `Review`: Star ratings (1 to 5) and viewer comments with timestamps, saved to the database.
-- **REST APIs**:
-  - `POST /api/watchlist/toggle/<movie_id>/`: Instant AJAX toggle for bookmarks.
-  - `GET /api/movie/<movie_id>/`: Deep metadata and reviews endpoint.
-  - `POST /api/movie/<movie_id>/review/`: Review submission endpoint.
-  - `POST /api/ai/chat/`: AI cinema concierge natural language processing endpoint.
-- **Django Admin Portal**: Full CRUD management of movies, genres, watchlists, and community reviews.
-- **Production WhiteNoise & Gunicorn**: Compressed static assets and WSGI application server ready for Render cloud hosting.
-
-### 3. 🧠 AI Engine Architecture (FlixAI)
-- **Multi-Tier Hybrid AI Engine (`myapp/ai_engine.py`)**:
-  - **Tier 1: Cloud LLM (Gemini API Integration)**: If `GEMINI_API_KEY` is present in environment variables, FlixAI calls Google Gemini with catalog context for advanced generative recommendations.
-  - **Tier 2: Built-in Neuro-Symbolic Cinematic NLP Engine**: Runs natively in Python without requiring external API keys. Parses queries for moods, themes, actors, directors, plot tropes, and content types, scoring the database catalog with relevance algorithms.
-- **Floating FlixAI Copilot**: A bottom-right glowing assistant button opening a full conversational drawer with quick-prompt chips (e.g. *"Mind-bending Sci-Fi like Inception"*, *"High octane tactical combat"*).
-- **Interactive Chat Recommendations**: FlixAI responds conversationally and embeds clickable movie cards directly into the chat stream with instant "Play" and "Info" actions.
-- **FlixAI Mood Matcher (`/ai-assistant/`)**: Dedicated discovery page mapping emotional states (*Mind-Bending 🤯*, *High Adrenaline ⚡*, *Dark Mystery 🕵️*, *Mythic Anime 🏮*, *Deep Character ♟️*) to tailored movie collections with custom AI reasoning.
-- **FlixAI Title Insights**: Deep detail modal incorporates synthesized *"Why You'll Love This"* summaries and dynamic hashtag vibe tags.
+StreamFlix is an authentic, production-grade streaming application featuring modern web architecture, an integrated AI concierge (**FlixAI**), automated error diagnosis, real-time request logging, and resilient fallback systems across relational SQL and document-based NoSQL datastores.
 
 ---
 
-## 📂 Project Structure
+## 🎯 Compliance Checklist (Assessment Requirements)
+
+| Requirement | Implementation Details | Status |
+| :--- | :--- | :---: |
+| **Responsive Website (3+ Pages)** | Includes Home (`/`), FAQs (`/faqs/`), Error Codes (`/error-codes/`), Support Desk (`/support/`), Health (`/health/`), Movies (`/movies/`), TV Series (`/tv-shows/`), and Watchlist (`/my-list/`). Mobile optimized with responsive CSS flexbox/grid. | ✅ **Met** |
+| **Chat Widget on Every Page** | Floating FlixAI assistant drawer injected globally via `base.html` accessible from any route across desktop & mobile. | ✅ **Met** |
+| **10+ FAQs in SQL Database** | 12 comprehensive FAQs stored in SQLite/SQL (`FAQ` model) and interactively rendered on the `/faqs/` page with search and category filters. | ✅ **Met** |
+| **8+ Error Codes (including site-specific)** | 8 codes documented and queryable (`ErrorCode` model): `400`, `401`, `403`, `404`, `429`, `500`, `503`, and proprietary `FLIX-402` (Concurrency Limit Exceeded). Accessible at `/error-codes/`. | ✅ **Met** |
+| **Custom 404 & 500 Pages** | Custom cinematic `404.html` and `500.html` error templates with direct **"Ask the Assistant"** one-click diagnostic escalation. | ✅ **Met** |
+| **AI Assistant (FAQs, Errors, Tickets)** | **FlixAI** natural language engine in `myapp/ai_engine.py` searches SQL FAQs, provides in-depth explanations for HTTP/site error codes, and automatically generates SQL support tickets when inquiries are unresolved. | ✅ **Met** |
+| **Dual Database (SQL & MongoDB)** | • **SQL (SQLite/PostgreSQL):** Stores relational data (`Movie`, `Genre`, `Review`, `FAQ`, `ErrorCode`, `SupportTicket`, `RequestLog`).<br>• **MongoDB:** Stores semi-structured chat conversation logs and user feedback via `myapp/mongo_db.py`. | ✅ **Met** |
+| **Security & Environment Variables** | No secrets stored in GitHub. Configured using environment variables (`SECRET_KEY`, `MONGODB_URI`, `GEMINI_API_KEY`, `DEBUG`) with `.env.example` template provided. | ✅ **Met** |
+| **Request Logging & Health Check** | Custom middleware `RequestLoggingMiddleware` records path, method, status, latency, and IP. Live system diagnostics available at `/health/` (and `/health/?format=json`). | ✅ **Met** |
+| **Third-Party API (Timeout & Fallback)** | Consumes external daily developer quote API (`myapp/third_party.py`) with strict `timeout=2.0s` and zero-latency curated fallback mechanism. | ✅ **Met** |
+| **Proposed Improvement** | Detailed in this README under [Proposed Improvement & Future Roadmap](#-proposed-improvement--future-roadmap). | ✅ **Met** |
+
+---
+
+## 🏛️ System Architecture
 
 ```text
-myproject/
-├── myproject/             # Core Django configuration
-│   ├── settings.py        # WhiteNoise, static files, and security settings
-│   ├── urls.py            # Global URL dispatcher
-│   └── wsgi.py            # WSGI application entrypoint for Gunicorn
-├── myapp/                 # StreamFlix application
-│   ├── ai_engine.py       # FlixAI NLP & Gemini recommendation engine
-│   ├── models.py          # Genre, Movie, Watchlist, Review models
-│   ├── views.py           # Views for Home, TV Shows, Movies, My List, AI Assistant & APIs
-│   ├── urls.py            # App routes & REST API endpoints
-│   ├── admin.py           # Django Admin panel registration
-│   ├── templates/myapp/   # Semantic templates (base, home, browse, my_list, search, ai_assistant)
-│   └── static/myapp/css/  # Custom Netflix design system stylesheet (netflix.css)
-├── build.sh               # Render cloud build script
-├── render.yaml            # Render infrastructure specification
-├── requirements.txt       # Production dependencies (Django, Gunicorn, WhiteNoise, Requests)
-├── manage.py
-└── README.md
+[ Web Client (Desktop / Mobile) ]
+             │
+             ▼
+   [ Django Web Server / Gunicorn / WhiteNoise ]
+             │
+             ├── [ RequestLoggingMiddleware ] ──► [ SQL Database (RequestLog) ]
+             │
+             ├── [ Core Routing & Views ]
+             │     ├── Home / Movies / TV Shows / Watchlist
+             │     ├── FAQs Page ──────────────► [ SQL Database (FAQ Table) ]
+             │     ├── Error Reference ────────► [ SQL Database (ErrorCode Table) ]
+             │     ├── Support Portal ─────────► [ SQL Database (SupportTicket) ]
+             │     └── Health Check ───────────► Real-time Latency & DB Ping
+             │
+             ├── [ FlixAI Concierge Engine (myapp/ai_engine.py) ]
+             │     ├── 1. Natural Language Intent Matcher
+             │     ├── 2. Error Code Diagnostic Lookup
+             │     ├── 3. SQL FAQ Knowledge Search
+             │     ├── 4. Automated Support Ticket Creator (Escalation)
+             │     └── 5. Conversation & Feedback Logger ──► [ MongoDB (NoSQL) ]
+             │
+             └── [ Third-Party API Client (myapp/third_party.py) ]
+                   ├── Primary: Live ZenQuotes / DummyJSON (Timeout: 2.0s)
+                   └── Resilient Fallback: Local Cached Quotes Engine
 ```
 
 ---
 
-## 🛠️ Local Development Setup
+## 🛠️ Technology Stack
+- **Backend:** Python 3.12+, Django 6.x, Gunicorn WSGI, WhiteNoise static engine.
+- **Frontend:** Semantic HTML5, Vanilla CSS3 (Dark Theme `#141414`, `#E50914` accents), JavaScript ES6+.
+- **Databases:**
+  - **Relational SQL:** SQLite / PostgreSQL (Django ORM).
+  - **NoSQL Document Store:** MongoDB (via `pymongo` with resilient fallback).
+- **Hosting & Cloud:** Render Web Service (`render.yaml` Blueprint).
 
-### 1. Clone the repository
+---
+
+## 🚀 Local Installation & Running Guide
+
+### 1. Clone the Repository
 ```bash
 git clone https://github.com/bhuvanashreekr-del/netflix-clone.git
 cd netflix-clone
 ```
 
-### 2. Set up a virtual environment
+### 2. Set Up Virtual Environment & Dependencies
 ```bash
-# Windows
 python -m venv .venv
+# On Windows:
 .venv\Scripts\activate
-
-# macOS / Linux
-python3 -m venv .venv
+# On macOS/Linux:
 source .venv/bin/activate
-```
 
-### 3. Install dependencies
-```bash
 pip install -r requirements.txt
 ```
 
-### 4. Apply database migrations
+### 3. Environment Configuration
+Copy `.env.example` to `.env`:
+```bash
+cp .env.example .env
+```
+*(Optionally provide `MONGODB_URI` and `GEMINI_API_KEY` in `.env`)*
+
+### 4. Database Setup & Seeding
 ```bash
 python manage.py migrate
+python seed_db.py
 ```
 
-### 5. Start the local server
+### 5. Launch Development Server
 ```bash
 python manage.py runserver
 ```
-
-Open **[http://127.0.0.1:8000/](http://127.0.0.1:8000/)** in your browser!
-
----
-
-## ☁️ Deploying to Render (Free Hosting)
-
-1. Sign in to **[Render.com](https://render.com)** with your GitHub account (`bhuvanashreekr-del`).
-2. Click **New +** > **Web Service**.
-3. Select your repository: **`netflix-clone`**.
-4. Configure the settings:
-   - **Name**: `streamflix-app`
-   - **Language**: `Python 3`
-   - **Build Command**: `./build.sh`
-   - **Start Command**: `gunicorn myproject.wsgi:application`
-   - *(Optional)* **Environment Variables**: Add `GEMINI_API_KEY` if you wish to use Google Gemini for FlixAI.
-5. Click **Create Web Service**.
+Visit **[http://127.0.0.1:8000/](http://127.0.0.1:8000/)** in your browser.
 
 ---
 
-## 👤 Author
-- **Bhuvanashree K R**
-- GitHub: [@bhuvanashreekr-del](https://github.com/bhuvanashreekr-del)
-- Email: [bhuvanashreekr@gmail.com](mailto:bhuvanashreekr@gmail.com)
+## 💡 Proposed Improvement & Future Roadmap
+*(Required Assessment Submission Section)*
+
+### **Proposed Improvement: Real-Time Voice-Interactive Support Assistant via WebRTC & Automated Ticket Notification Webhooks**
+
+#### Context & Motivation:
+While the current text-based **FlixAI** assistant delivers rapid diagnosis of FAQs and error codes, streaming platform users encountering playback disruptions on living room smart TVs, tablets, or mobile devices experience high friction when typing detailed problem descriptions using on-screen keyboards.
+
+#### Proposed Implementation:
+1. **Low-Latency Voice AI Pipeline (WebRTC + Whisper):**
+   - Integrate an in-browser voice capture interface using the Web Audio API and WebRTC.
+   - Stream audio directly to a serverless transcription endpoint running OpenAI Whisper or Google Speech-to-Text for instant voice-to-text conversion.
+   - Implement streaming text-to-speech (TTS) to verbally explain error codes (e.g. speaking: *"You are encountering Error FLIX-402 because your active stream limit was reached on another device"*).
+2. **Automated Notification Webhooks for Support Tickets:**
+   - When FlixAI escalates an issue and writes a `SupportTicket` to the SQL database, trigger an asynchronous background task (via Celery or Django Signals) dispatching an instant webhook to Slack/Discord or email (SendGrid).
+   - This ensures engineering on-call responders receive critical ticket alerts (`URGENT` priority) in under 5 seconds.
+
+#### Business & Technical Impact:
+- **Reduces Time-to-Resolution (TTR)** by up to 60% for non-technical users.
+- **Enhanced Accessibility (a11y)** for visually impaired users who cannot navigate complex error text.
+
+---
+
+## 👤 Author & Credentials
+- **Student Developer:** Bhuvanashree  
+- **GitHub:** [@bhuvanashreekr-del](https://github.com/bhuvanashreekr-del)  
+- **Default Admin Portal:** `http://127.0.0.1:8000/admin/` (`admin` / `admin123`)

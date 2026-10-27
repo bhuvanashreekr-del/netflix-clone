@@ -1,0 +1,124 @@
+{% extends 'myapp/base.html' %}
+
+{% block content %}
+<div class="content-container" style="max-width: 1050px; margin: 40px auto; padding: 20px;">
+  
+  <div style="text-align: center; margin-bottom: 40px;">
+    <span class="badge" style="background: rgba(34, 197, 94, 0.2); color: #22c55e; padding: 6px 14px; border-radius: 20px; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">Support Ticketing System (SQL Stored)</span>
+    <h1 style="font-size: 2.5rem; font-weight: 800; margin-top: 15px; color: #fff;">Help Desk & Support Tickets</h1>
+    <p style="color: #a3a3a3; font-size: 1.1rem; max-width: 650px; margin: 10px auto;">
+      Submit a technical inquiry or track tickets generated automatically by the AI Assistant when resolving complex system issues.
+    </p>
+  </div>
+
+  {% if created_id %}
+    <div style="background: rgba(34, 197, 94, 0.15); border: 1px solid #22c55e; border-radius: 10px; padding: 18px 24px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <h4 style="color: #22c55e; font-weight: 800; font-size: 1.1rem; margin-bottom: 4px;">Ticket Created Successfully!</h4>
+        <p style="color: #ccc; font-size: 0.95rem;">Your reference number is <strong style="color: #fff;">#{{ created_id }}</strong>. Our team has been notified.</p>
+      </div>
+      <a href="{% url 'support' %}" style="color: #22c55e; text-decoration: underline; font-weight: 600;">Dismiss</a>
+    </div>
+  {% endif %}
+
+  <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 30px; align-items: start;">
+    
+    <!-- Submit Form -->
+    <div style="background: #181818; border: 1px solid #282828; border-radius: 12px; padding: 28px;">
+      <h3 style="font-size: 1.3rem; font-weight: 800; color: #fff; margin-bottom: 20px;">Open a Support Ticket</h3>
+      
+      <form method="post" action="{% url 'support' %}" style="display: flex; flex-direction: column; gap: 16px;">
+        {% csrf_token %}
+        <div>
+          <label style="display: block; font-size: 0.85rem; color: #aaa; margin-bottom: 6px; font-weight: 600;">Your Name</label>
+          <input type="text" name="name" required placeholder="Bhuvanashree" 
+                 style="width: 100%; background: #0e0e0e; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px;">
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 0.85rem; color: #aaa; margin-bottom: 6px; font-weight: 600;">Email Address</label>
+          <input type="email" name="email" required placeholder="user@example.com" 
+                 style="width: 100%; background: #0e0e0e; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px;">
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 0.85rem; color: #aaa; margin-bottom: 6px; font-weight: 600;">Subject / Issue Summary</label>
+          <input type="text" name="subject" required placeholder="Playback buffer error on episode 3" 
+                 style="width: 100%; background: #0e0e0e; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div>
+            <label style="display: block; font-size: 0.85rem; color: #aaa; margin-bottom: 6px; font-weight: 600;">Related Error Code</label>
+            <input type="text" name="error_code" placeholder="e.g. 404 or FLIX-402" 
+                   style="width: 100%; background: #0e0e0e; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.85rem; color: #aaa; margin-bottom: 6px; font-weight: 600;">Priority</label>
+            <select name="priority" style="width: 100%; background: #0e0e0e; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px;">
+              <option value="LOW">Low</option>
+              <option value="MEDIUM" selected>Medium</option>
+              <option value="HIGH">High</option>
+              <option value="URGENT">Urgent</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 0.85rem; color: #aaa; margin-bottom: 6px; font-weight: 600;">Detailed Description</label>
+          <textarea name="description" rows="4" required placeholder="Please describe what occurred and steps to reproduce..." 
+                    style="width: 100%; background: #0e0e0e; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px;"></textarea>
+        </div>
+
+        <button type="submit" style="background: #E50914; color: #fff; border: none; padding: 14px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: 0.2s;">
+          Submit Ticket to Database
+        </button>
+      </form>
+    </div>
+
+    <!-- Live Ticket Feed -->
+    <div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: #fff;">Recent Tickets ({{ total_tickets }})</h3>
+        <span style="font-size: 0.8rem; color: #888;">Live SQLite Records</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        {% for t in tickets %}
+          <div style="background: #181818; border: 1px solid #262626; border-radius: 10px; padding: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-family: monospace; font-size: 0.85rem; color: #c084fc; background: #26173a; padding: 3px 8px; border-radius: 4px;">#{{ t.ticket_id }}</span>
+                {% if t.created_by_ai %}
+                  <span style="font-size: 0.7rem; background: rgba(192, 132, 252, 0.2); color: #c084fc; padding: 2px 6px; border-radius: 4px; font-weight: 700;">🤖 AI Generated</span>
+                {% endif %}
+              </div>
+              <span style="font-size: 0.75rem; font-weight: 800; padding: 4px 8px; border-radius: 4px; 
+                           {% if t.status == 'OPEN' %}background: rgba(59, 130, 246, 0.2); color: #60a5fa;
+                           {% elif t.status == 'IN_PROGRESS' %}background: rgba(245, 158, 11, 0.2); color: #fbbf24;
+                           {% else %}background: rgba(34, 197, 94, 0.2); color: #4ade80;{% endif %}">
+                {{ t.status }}
+              </span>
+            </div>
+
+            <h4 style="font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 6px;">{{ t.subject }}</h4>
+            <p style="color: #999; font-size: 0.85rem; line-height: 1.5; margin-bottom: 10px;">{{ t.description|truncatewords:20 }}</p>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #666; border-top: 1px solid #222; padding-top: 8px;">
+              <span>By: {{ t.name }}</span>
+              <span>Priority: <strong style="color: {% if t.priority == 'URGENT' %}#f87171{% else %}#ddd{% endif %};">{{ t.priority }}</strong></span>
+              <span>{{ t.created_at|date:"M d, Y" }}</span>
+            </div>
+          </div>
+        {% empty %}
+          <div style="text-align: center; padding: 40px; background: #141414; border-radius: 10px; color: #777;">
+            No tickets currently recorded.
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

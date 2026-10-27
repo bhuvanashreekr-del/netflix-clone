@@ -6,7 +6,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myproject.settings')
 import django
 django.setup()
 
-from myapp.models import Genre, Movie, Review
+from myapp.models import Genre, Movie, Review, FAQ, ErrorCode, SupportTicket
 
 def seed():
     if Movie.objects.count() >= 10:
@@ -332,5 +332,210 @@ def seed():
 
     print(f"[Seed] Completed! {Movie.objects.count()} movies populated.")
 
+def seed_faqs():
+    print("Seeding FAQs (minimum 10 required)...")
+    faqs_data = [
+        {
+            "question": "How do I upgrade or manage my StreamFlix subscription?",
+            "answer": "You can manage your subscription under Account Settings > Membership & Billing. StreamFlix offers Standard (HD, 2 screens) and Premium (4K Ultra HD + HDR, 4 screens) tiers with cancel-anytime flexibility.",
+            "category": "billing",
+            "order": 1
+        },
+        {
+            "question": "What internet speed is required to stream in 4K Ultra HD?",
+            "answer": "A stable internet connection speed of at least 15 Mbps to 25 Mbps is recommended for smooth 4K Ultra HD playback. For Full HD (1080p), a 5 Mbps connection is sufficient.",
+            "category": "streaming",
+            "order": 2
+        },
+        {
+            "question": "Can I download movies and TV shows for offline viewing?",
+            "answer": "Yes! On supported mobile devices and tablets, tap the Download icon next to any movie title. Downloaded titles remain available offline in 'My Downloads' for up to 30 days.",
+            "category": "streaming",
+            "order": 3
+        },
+        {
+            "question": "How does the FlixAI Concierge recommend content?",
+            "answer": "FlixAI uses hybrid NLP and mood-intent semantic ranking to analyze your preferences, natural language mood descriptors (e.g. 'adrenaline rush', 'relaxing comedy'), and watch history to curate tailored lists.",
+            "category": "ai_concierge",
+            "order": 4
+        },
+        {
+            "question": "How do I add a title to My Watchlist?",
+            "answer": "Hover over any movie or series card and click the '+' (Plus) icon, or open the movie details modal and select 'Add to My List'. You can view your saved items anytime on the /my-list/ page.",
+            "category": "general",
+            "order": 5
+        },
+        {
+            "question": "Why am I seeing an error message while streaming?",
+            "answer": "Streaming errors are usually caused by temporary network interruptions, browser cache conflicts, or rate limits. Check our dedicated Error Codes page (/error-codes/) or ask our AI assistant to diagnose your specific error code.",
+            "category": "troubleshooting",
+            "order": 6
+        },
+        {
+            "question": "How do I report a playback glitch or request support?",
+            "answer": "You can ask the AI assistant in the chat widget on any page to create an automated support ticket, or manually submit your ticket on the /support/ page. Tickets are tracked in real-time.",
+            "category": "troubleshooting",
+            "order": 7
+        },
+        {
+            "question": "Does StreamFlix support Spatial Audio and Dolby Atmos?",
+            "answer": "Yes, Premium tier titles badged with 'Dolby Atmos' or '5.1 Surround' support multi-channel spatial audio on compatible smart TVs, AV receivers, and headphones.",
+            "category": "streaming",
+            "order": 8
+        },
+        {
+            "question": "How do I reset my account password or update my email?",
+            "answer": "Navigate to the Login page, click 'Forgot Password', and enter your registered email. A secure one-time reset link will be dispatched immediately.",
+            "category": "general",
+            "order": 9
+        },
+        {
+            "question": "Are parental controls available to restrict mature content?",
+            "answer": "Yes. You can configure age-rating filters (U/A 7+, U/A 13+, U/A 16+, A) and protect adult profiles with a 4-digit PIN under Account > Profile & Parental Controls.",
+            "category": "general",
+            "order": 10
+        },
+        {
+            "question": "What is Error FLIX-402?",
+            "answer": "FLIX-402 is a site-specific code indicating that the title is restricted to VIP subscribers or that the maximum simultaneous streaming quota for your current tier has been reached.",
+            "category": "troubleshooting",
+            "order": 11
+        },
+        {
+            "question": "Where are chat logs and feedback stored?",
+            "answer": "In accordance with modern microservices architecture, chat conversations and feedback are stored in a scalable NoSQL MongoDB cluster, while user accounts and tickets are stored in SQL.",
+            "category": "ai_concierge",
+            "order": 12
+        }
+    ]
+
+    for item in faqs_data:
+        FAQ.objects.update_or_create(
+            question=item['question'],
+            defaults=item
+        )
+    print(f"✓ Total FAQs in DB: {FAQ.objects.count()}")
+
+def seed_error_codes():
+    print("Seeding Error Codes (8 required: 400, 401, 403, 404, 429, 500, 503 + 1 site-specific)...")
+    error_data = [
+        {
+            "code": "400",
+            "title": "Bad Request",
+            "category": "HTTP Client Error",
+            "description": "The server could not understand the request due to malformed syntax, invalid JSON payload, or missing mandatory headers.",
+            "common_causes": "Syntax errors in client API requests, missing query parameters, expired browser cookies, or corrupted file uploads.",
+            "troubleshooting": "1. Verify payload formatting (ensure JSON is valid).\n2. Clear browser cookies and cache.\n3. Check API parameter names and types.",
+            "is_site_specific": False
+        },
+        {
+            "code": "401",
+            "title": "Unauthorized",
+            "category": "HTTP Client Error",
+            "description": "The client must authenticate itself to get the requested response. Valid login credentials or an active session token are required.",
+            "common_causes": "Expired authentication session, missing Bearer token, incorrect password, or invalid session key.",
+            "troubleshooting": "1. Log into your account.\n2. Refresh your authentication token.\n3. Ensure cookies are enabled in your browser.",
+            "is_site_specific": False
+        },
+        {
+            "code": "403",
+            "title": "Forbidden",
+            "category": "HTTP Client Error",
+            "description": "The client identity is known, but the server refuses authorization. Unlike 401, re-authenticating does not grant access.",
+            "common_causes": "Attempting to access admin-only views without staff permissions, geographic content licensing restrictions, or CSRF token mismatch.",
+            "troubleshooting": "1. Check your user account permission level.\n2. Ensure CSRF tokens are included on POST requests.\n3. Contact an administrator to request elevated permissions.",
+            "is_site_specific": False
+        },
+        {
+            "code": "404",
+            "title": "Not Found",
+            "category": "HTTP Client Error",
+            "description": "The server cannot find the requested resource. The endpoint or movie URL does not exist or has been deleted.",
+            "common_causes": "Typo in the URL bar, an expired link, or deleted catalog media.",
+            "troubleshooting": "1. Double-check the URL spelling.\n2. Return to the Home page or browse categories.\n3. Click 'Ask the Assistant' on the 404 error page to get immediate help.",
+            "is_site_specific": False
+        },
+        {
+            "code": "429",
+            "title": "Too Many Requests",
+            "category": "HTTP Client Error",
+            "description": "The user has sent too many requests in a given amount of time (Rate Limiting).",
+            "common_causes": "Rapidly spamming API endpoints, continuous search queries without debouncing, or automated scraping bots.",
+            "troubleshooting": "1. Wait a few moments (usually 30–60 seconds) before retrying.\n2. Implement client-side debounce on search inputs.\n3. Avoid automated scrapers.",
+            "is_site_specific": False
+        },
+        {
+            "code": "500",
+            "title": "Internal Server Error",
+            "category": "HTTP Server Error",
+            "description": "The server encountered an unexpected condition that prevented it from fulfilling the request.",
+            "common_causes": "Unhandled Python exceptions, database lockups, unapplied database migrations, or misconfigured middleware.",
+            "troubleshooting": "1. Check server-side logs (`python manage.py runserver` or Render runtime logs).\n2. Verify database connectivity and migrations.\n3. Submit a support ticket so our engineers can investigate.",
+            "is_site_specific": False
+        },
+        {
+            "code": "503",
+            "title": "Service Unavailable",
+            "category": "HTTP Server Error",
+            "description": "The server is currently unable to handle the request due to a temporary overload, cold-start booting, or maintenance.",
+            "common_causes": "Server restarting after a deployment, upstream microservice failure, or traffic spike exceeding host limits.",
+            "troubleshooting": "1. Wait 30 seconds and refresh the page.\n2. Check the system status at /health/.\n3. Verify that upstream cloud workers are online.",
+            "is_site_specific": False
+        },
+        {
+            "code": "FLIX-402",
+            "title": "VIP Tier Concurrency Limit Exceeded",
+            "category": "Site-Specific Application Code",
+            "description": "StreamFlix proprietary error indicating your account has reached its concurrent 4K stream limit or requires a VIP tier upgrade.",
+            "common_causes": "Streaming on more devices simultaneously than allowed by your subscription plan, or attempting to view 4K Ultra HD content on a Basic tier.",
+            "troubleshooting": "1. Stop streaming on other household devices.\n2. Upgrade your membership plan in Account Settings.\n3. Ask the FlixAI Assistant to reset active device sessions.",
+            "is_site_specific": True
+        }
+    ]
+
+    for item in error_data:
+        ErrorCode.objects.update_or_create(
+            code=item['code'],
+            defaults=item
+        )
+    print(f"✓ Total Error Codes in DB: {ErrorCode.objects.count()}")
+
+def seed_sample_tickets():
+    print("Seeding Sample Support Tickets...")
+    tickets = [
+        {
+            "ticket_id": "TICK-104921",
+            "name": "Sarah Connor",
+            "email": "sarah@cyberdyne.org",
+            "subject": "Audio desync on Cyberpunk: Neon Horizon 4K",
+            "description": "The Dolby Atmos audio track drifts by approx 500ms when playing on Chrome browser with 120Hz monitor.",
+            "error_code": "FLIX-402",
+            "status": "IN_PROGRESS",
+            "priority": "HIGH",
+            "created_by_ai": True
+        },
+        {
+            "ticket_id": "TICK-104922",
+            "name": "Alex Mercer",
+            "email": "alex@mercer-tech.io",
+            "subject": "Question about offline download DRM limits",
+            "description": "I would like clarification on how many offline devices are permitted per user account.",
+            "error_code": "",
+            "status": "OPEN",
+            "priority": "LOW",
+            "created_by_ai": True
+        }
+    ]
+    for t in tickets:
+        SupportTicket.objects.update_or_create(
+            ticket_id=t['ticket_id'],
+            defaults=t
+        )
+    print(f"✓ Total Support Tickets in DB: {SupportTicket.objects.count()}")
+
+
 if __name__ == '__main__':
     seed()
+    seed_faqs()
+    seed_error_codes()
+    seed_sample_tickets()

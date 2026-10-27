@@ -1,0 +1,37 @@
+{% extends 'myapp/base.html' %}
+
+{% block content %}
+<div style="min-height: 70vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; text-align: center;">
+  <div style="max-width: 650px; background: rgba(20, 20, 20, 0.9); border: 1px solid #441a1a; border-radius: 16px; padding: 48px 32px; box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
+    
+    <div style="font-family: 'Bebas Neue', sans-serif; font-size: 6.5rem; letter-spacing: 4px; color: #ef4444; line-height: 1;">
+      500
+    </div>
+    
+    <h1 style="font-size: 2rem; font-weight: 800; color: #fff; margin: 12px 0;">Internal Server Glitch</h1>
+    
+    <p style="color: #aaa; font-size: 1.1rem; line-height: 1.6; margin-bottom: 30px;">
+      An unexpected internal server error occurred while processing your request. Our automated logging system has recorded the incident.
+    </p>
+
+    <!-- Requirement: "Custom 404 and 500 pages with an 'Ask the assistant' option" -->
+    <div style="display: flex; flex-direction: column; gap: 14px; max-width: 400px; margin: 0 auto;">
+      <button onclick="openFlixAiAssistant('Explain why I got a 500 Internal Server Error and create a support ticket for this glitch!')" 
+              style="background: #E50914; color: #fff; border: none; padding: 16px 24px; border-radius: 8px; font-weight: 800; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 20px rgba(229, 9, 20, 0.5); transition: 0.2s;">
+        <span>🤖</span>
+        <span>Ask the Assistant & Escalate</span>
+      </button>
+
+      <a href="{% url 'home' %}" 
+         style="background: #2a2a2a; color: #fff; text-decoration: none; padding: 14px 24px; border-radius: 8px; font-weight: 700; font-size: 0.95rem;">
+        Return to Safety (Home)
+      </a>
+
+      <a href="{% url 'health' %}" style="color: #888; font-size: 0.85rem; text-decoration: underline; margin-top: 6px;">
+        Check Real-Time System Health
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

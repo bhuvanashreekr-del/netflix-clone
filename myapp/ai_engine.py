@@ -1,227 +1,231 @@
 import os
 import re
 import json
-import requests
-from django.db.models import Q
-from .models import Movie, Genre
+import logging
+from .models import FAQ, ErrorCode, SupportTicket, Movie
+from .mongo_db import save_chat_log
 
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
+logger = logging.getLogger('myapp.ai')
 
-# Predefined Mood Profiles with curated thematic keywords
-MOOD_PROFILES = {
-    'mind-bending': {
-        'title': 'Mind-Bending & Paradoxes 🤯',
-        'keywords': ['wormhole', 'time', 'quantum', 'dream', 'subatomic', 'physics', 'relativity', 'simulation', 'dimension', 'cyber'],
-        'genres': ['sci-fi', 'thriller'],
-        'tagline': 'Reality is merely an illusion. Prepare to question everything.',
-    },
-    'adrenaline': {
-        'title': 'High Adrenaline & Combat ⚡',
-        'keywords': ['mercenary', 'extraction', 'action', 'warfare', 'combat', 'sniper', 'explosive', 'assassin', 'frontline'],
-        'genres': ['action', 'thriller'],
-        'tagline': 'Pulse-pounding stunts, relentless pacing, and explosive action.',
-    },
-    'dark-thrills': {
-        'title': 'Dark Mystery & Suspense 🕵️',
-        'keywords': ['supernatural', 'disappears', 'cartel', 'syndicate', 'investigation', 'secrets', 'conspiracy', 'shadows'],
-        'genres': ['thriller', 'crime', 'drama'],
-        'tagline': 'Unravel dangerous conspiracies where nobody is who they seem.',
-    },
-    'anime-fantasy': {
-        'title': 'Mythic Anime & Fantasy 🏮',
-        'keywords': ['titan', 'katana', 'demons', 'spiritual', 'curse', 'alchemy', 'sanctuary', 'shrine', 'ancient'],
-        'genres': ['anime', 'fantasy', 'adventure'],
-        'tagline': 'Step through mystical gateways into stunning animated worlds.',
-    },
-    'cerebral-drama': {
-        'title': 'Deep Character & Genius ♟️',
-        'keywords': ['chess', 'prodigy', 'master', 'psychologist', 'solaris', 'sentient', 'obsession', 'talent', 'inner demons'],
-        'genres': ['drama'],
-        'tagline': 'Intense character studies and the price of extraordinary genius.',
-    }
-}
-
-def analyze_user_prompt(prompt, available_movies):
-    """
-    Intelligent Hybrid AI Recommender:
-    Attempts Gemini API if key is set, otherwise utilizes built-in Cinematic NLP Engine.
-    """
-    prompt_clean = prompt.strip().lower()
-
-    if GEMINI_API_KEY:
-        try:
-            return _call_gemini_recommender(prompt, available_movies)
-        except Exception as e:
-            print(f"[FlixAI] Gemini call failed ({e}), falling back to internal NLP engine.")
-
-    return _internal_nlp_recommender(prompt_clean, available_movies)
-
-def _call_gemini_recommender(prompt, available_movies):
-    """Call Google Gemini Generative API with structured movie catalog context."""
-    catalog_summary = []
-    for m in available_movies[:15]:
-        genres = ", ".join([g.name for g in m.genres.all()])
-        catalog_summary.append(f"ID:{m.id} | Title:{m.title} | Genres:{genres} | Year:{m.release_year} | Director:{m.director} | Synopsis:{m.description[:120]}")
-
-    catalog_text = "\n".join(catalog_summary)
-
-    system_instruction = (
-        "You are FlixAI, the world-class cinema AI concierge for StreamFlix (a Netflix clone). "
-        "Recommend the most fitting titles from our catalog based on the user's mood, taste, or request. "
-        "Return a valid JSON object with two fields:\n"
-        "1. 'reply': A warm, witty, cinema-literate response explaining why these fit (approx 2-3 sentences).\n"
-        "2. 'recommended_ids': A list of integer IDs of the recommended movies from the catalog (top 1 to 4 IDs).\n"
-        "Output ONLY raw JSON, no markdown formatting."
-    )
-
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
-    payload = {
-        "contents": [{
-            "parts": [
-                {"text": f"{system_instruction}\n\nCATALOG:\n{catalog_text}\n\nUSER REQUEST: {prompt}"}
-            ]
-        }],
-        "generationConfig": {
-            "temperature": 0.4,
-            "maxOutputTokens": 400
-        }
-    }
-
-    resp = requests.post(url, json=payload, timeout=8)
-    if resp.status_code == 200:
-        data = resp.json()
-        raw_text = data['candidates'][0]['content']['parts'][0]['text']
-        raw_text = re.sub(r'```json\s*', '', raw_text)
-        raw_text = re.sub(r'```\s*', '', raw_text).strip()
-        parsed = json.loads(raw_text)
-        return {
-            'reply': parsed.get('reply', 'Here are our top hand-picked recommendations for you!'),
-            'recommended_ids': parsed.get('recommended_ids', [])
-        }
-
-    raise ValueError(f"Gemini API returned status {resp.status_code}")
-
-def _internal_nlp_recommender(prompt, available_movies):
-    """
-    Built-in Natural Language Understanding & Scoring Engine.
-    Requires no external API keys and provides human-like recommendations.
-    """
-    scored = []
-
-    # Tokenize words
-    words = set(re.findall(r'\b[a-z]{3,}\b', prompt))
-
-    # Identify explicit mood or intent
-    matched_mood = None
-    for key, profile in MOOD_PROFILES.items():
-        if any(kw in prompt for kw in profile['keywords']) or key in prompt:
-            matched_mood = profile
-            break
-
-    for movie in available_movies:
-        score = 0
-        search_blob = f"{movie.title} {movie.tagline} {movie.description} {movie.cast} {movie.director} ".lower()
-        movie_genres = [g.slug for g in movie.genres.all()]
-
-        # Keyword matching
-        for w in words:
-            if w in movie.title.lower():
-                score += 15
-            elif w in movie.director.lower() or w in movie.cast.lower():
-                score += 10
-            elif w in search_blob:
-                score += 4
-            if w in movie_genres:
-                score += 8
-
-        # Mood profile boost
-        if matched_mood:
-            if any(g in movie_genres for g in matched_mood['genres']):
-                score += 6
-            if any(kw in search_blob for kw in matched_mood['keywords']):
-                score += 5
-
-        # General quality & match score weighting
-        score += float(movie.rating) * 0.5
-        score += (movie.match_percentage / 100.0) * 2.0
-
-        if score > 5:
-            scored.append((score, movie))
-
-    # Sort descending
-    scored.sort(key=lambda x: x[0], reverse=True)
-    top_movies = [m for _, m in scored[:4]]
-
-    # If no high matches, provide top-rated trending fallback
-    if not top_movies:
-        top_movies = list(available_movies.filter(is_trending=True)[:3])
-
-    # Generate cinema concierge commentary
-    if any(k in prompt for k in ['scifi', 'sci-fi', 'space', 'quantum', 'future', 'mind', 'twist']):
-        reply = (
-            f"🚀 For mind-bending concepts and cosmic horizons, you are going to love "
-            f"**{top_movies[0].title}**! It pairs high-concept science with edge-of-your-seat drama. "
-            f"Here are our curated top picks for your request:"
-        )
-    elif any(k in prompt for k in ['action', 'fight', 'war', 'thrill', 'shoot', 'fast']):
-        reply = (
-            f"💥 Strap in! If you're craving relentless adrenaline, **{top_movies[0].title}** "
-            f"delivers top-tier stunt choreography and intense tactical pacing. Check these out:"
-        )
-    elif any(k in prompt for k in ['anime', 'titan', 'demon', 'japan', 'animation']):
-        reply = (
-            f"🏮 Excellent choice! For breathtaking world-building and epic battles, "
-            f"**{top_movies[0].title}** is an absolute tour de force in modern animation:"
-        )
-    elif any(k in prompt for k in ['mystery', 'crime', 'cartel', 'detective', 'dark']):
-        reply = (
-            f"🕵️ If you're drawn to gritty shadows, high-stakes investigations, and plot twists, "
-            f"**{top_movies[0].title}** will keep you guessing until the final seconds:"
-        )
-    else:
-        reply = (
-            f"✨ Based on your request, FlixAI has analyzed our catalog and matched you with "
-            f"**{top_movies[0].title}** ({top_movies[0].match_percentage}% Match) along with these top-rated titles:"
-        )
-
-    return {
-        'reply': reply,
-        'recommended_ids': [m.id for m in top_movies]
-    }
-
-def get_mood_movies(mood_key):
-    """Retrieve movies aligned with a specific mood profile."""
-    profile = MOOD_PROFILES.get(mood_key, MOOD_PROFILES['mind-bending'])
-    genre_slugs = profile['genres']
-
-    movies = Movie.objects.filter(
-        Q(genres__slug__in=genre_slugs) |
-        Q(is_trending=True)
-    ).distinct()[:8]
-
-    return {
-        'profile': profile,
-        'movies': movies
-    }
-
-def generate_movie_insights(movie):
-    """Generate AI insights and highlights for a movie modal."""
-    genres_list = [g.name for g in movie.genres.all()]
-
-    highlights = [
-        f"Director {movie.director} crafts an immersive atmosphere with stunning 4K visuals.",
-        f"Critically praised lead performances from {movie.cast.split(',')[0]} and the ensemble cast.",
-        f"Masterful sound design and pacing tailored for {', '.join(genres_list)} enthusiasts."
+def match_error_code(prompt):
+    """Detects if prompt queries an HTTP or site-specific error code."""
+    # Look for 3-digit numbers or site-specific codes like FLIX-402
+    patterns = [
+        r'\b(400|401|403|404|429|500|503)\b',
+        r'\b(flix[-_]?402|stream[-_]?402|402)\b',
+        r'\b(bad request|unauthorized|forbidden|not found|rate limit|too many requests|server error|service unavailable)\b'
     ]
+    
+    prompt_lower = prompt.lower()
+    
+    # Check direct code
+    code_match = re.search(r'\b(400|401|403|404|429|500|503)\b', prompt)
+    if code_match:
+        code = code_match.group(1)
+        err = ErrorCode.objects.filter(code=code).first()
+        if err:
+            return err
 
-    vibe_tags = [f"#{g.replace(' ', '')}" for g in genres_list]
-    vibe_tags.extend(["#HighStakes", f"#{movie.quality.replace(' ', '')}", f"#Rating_{int(movie.rating)}Star"])
+    if 'flix' in prompt_lower or 'site-specific' in prompt_lower or 'custom' in prompt_lower:
+        err = ErrorCode.objects.filter(is_site_specific=True).first()
+        if err:
+            return err
 
-    similar = Movie.objects.filter(genres__in=movie.genres.all()).exclude(id=movie.id).distinct()[:3]
-
-    return {
-        'why_watch': f"Why you'll love {movie.title}: {movie.tagline or movie.description[:100]}...",
-        'highlights': highlights,
-        'vibe_tags': vibe_tags[:5],
-        'similar_ids': [m.id for m in similar]
+    # Check textual keywords
+    keyword_map = {
+        'bad request': '400',
+        'unauthorized': '401',
+        'forbidden': '403',
+        'not found': '404',
+        'too many requests': '429',
+        'rate limit': '429',
+        'server error': '500',
+        'internal error': '500',
+        'service unavailable': '503',
+        'offline': '503',
     }
+    for kw, c in keyword_map.items():
+        if kw in prompt_lower:
+            err = ErrorCode.objects.filter(code=c).first()
+            if err:
+                return err
+
+    return None
+
+def match_faq(prompt):
+    """Searches SQL FAQ database using keyword relevance matching."""
+    prompt_words = set(re.findall(r'\w+', prompt.lower()))
+    stop_words = {'what', 'is', 'how', 'do', 'i', 'can', 'the', 'a', 'an', 'to', 'in', 'for', 'of', 'and', 'my', 'please', 'tell', 'me'}
+    keywords = prompt_words - stop_words
+
+    if not keywords:
+        return None
+
+    faqs = FAQ.objects.filter(is_active=True)
+    best_faq = None
+    best_score = 0
+
+    for faq in faqs:
+        q_words = set(re.findall(r'\w+', faq.question.lower()))
+        a_words = set(re.findall(r'\w+', faq.answer.lower()))
+        
+        # Calculate overlap score
+        q_overlap = len(keywords & q_words) * 3  # Question match weighted 3x
+        a_overlap = len(keywords & a_words) * 1
+        score = q_overlap + a_overlap
+
+        if score > best_score:
+            best_score = score
+            best_faq = faq
+
+    # Threshold for a confident answer
+    if best_score >= 3:
+        return best_faq
+    return None
+
+def should_escalate_to_ticket(prompt):
+    """Determines whether a question cannot be answered and requires ticket creation."""
+    escalation_phrases = [
+        'create ticket', 'raise ticket', 'support ticket', 'open ticket',
+        'complaint', 'not working', 'broken', 'issue', 'human',
+        'agent', 'customer care', 'refund', 'charged twice', 'billing problem',
+        'bug', 'error', 'failed', 'cannot login', 'cannot watch', 'black screen'
+    ]
+    prompt_lower = prompt.lower()
+    return any(p in prompt_lower for p in escalation_phrases)
+
+def create_support_ticket_from_prompt(prompt, session_key='', error_code=''):
+    """Creates a support ticket in SQL database when AI cannot resolve or user asks."""
+    import random
+    subject = prompt[:100] if len(prompt) > 10 else "User Support Request via AI Assistant"
+    
+    # Priority determination
+    priority = "MEDIUM"
+    if any(w in prompt.lower() for w in ['urgent', 'emergency', 'asap', 'broken', 'charged', 'refund']):
+        priority = "HIGH"
+    elif any(w in prompt.lower() for w in ['crash', 'down', 'critical', '500', '503']):
+        priority = "URGENT"
+
+    ticket = SupportTicket.objects.create(
+        name="StreamFlix User",
+        email="user@streamflix.local",
+        subject=subject,
+        description=prompt,
+        error_code=error_code,
+        priority=priority,
+        created_by_ai=True
+    )
+    return ticket
+
+def analyze_user_prompt(prompt, all_movies=None, session_id='guest_session'):
+    """
+    Main AI Orchestrator:
+    1. Explains Error Codes (400, 401, 403, 404, 429, 500, 503, FLIX-402)
+    2. Answers from SQL FAQ Knowledge Base
+    3. Escalates & Creates SQL Support Ticket when unanswerable
+    4. Provides Movie Recommendations
+    5. Saves chat logs to MongoDB
+    """
+    prompt_clean = prompt.strip()
+    result = {
+        'reply': '',
+        'intent': 'general',
+        'recommended_ids': [],
+        'ticket_id': None,
+        'matched_error': None,
+        'matched_faq': None
+    }
+
+    # 1. Check for Error Code query
+    err = match_error_code(prompt_clean)
+    if err:
+        site_badge = " [Site-Specific Custom Code]" if err.is_site_specific else ""
+        reply = (
+            f"⚠️ **Error {err.code}: {err.title}**{site_badge}\n\n"
+            f"**Description:**\n{err.description}\n\n"
+            f"**Common Causes:**\n{err.common_causes}\n\n"
+            f"**How to Resolve:**\n{err.troubleshooting}"
+        )
+        result['reply'] = reply
+        result['intent'] = 'error_code_explanation'
+        result['matched_error'] = err.code
+        save_chat_log(session_id, prompt_clean, reply, intent='error_code_explanation', metadata={'code': err.code})
+        return result
+
+    # 2. Check if user needs support ticket or issue escalation
+    if should_escalate_to_ticket(prompt_clean):
+        ticket = create_support_ticket_from_prompt(prompt_clean, session_key=session_id)
+        reply = (
+            f"🎫 **Support Ticket Created Successfully!**\n\n"
+            f"I have automatically escalated this issue to our technical support team:\n\n"
+            f"• **Ticket ID:** `{ticket.ticket_id}`\n"
+            f"• **Status:** `OPEN`\n"
+            f"• **Priority:** `{ticket.priority}`\n"
+            f"• **Subject:** _{ticket.subject}_\n\n"
+            f"Our engineers have been alerted. You can track this in real-time on our [Support Desk](/support/)!"
+        )
+        result['reply'] = reply
+        result['intent'] = 'ticket_escalation'
+        result['ticket_id'] = ticket.ticket_id
+        save_chat_log(session_id, prompt_clean, reply, intent='ticket_escalation', metadata={'ticket_id': ticket.ticket_id})
+        return result
+
+    # 3. Check for FAQ query
+    faq = match_faq(prompt_clean)
+    if faq:
+        reply = (
+            f"💡 **Frequently Asked Question** ({faq.get_category_display()}):\n\n"
+            f"**Q: {faq.question}**\n\n"
+            f"{faq.answer}\n\n"
+            f"_For more assistance or account settings, visit our [FAQ Page](/faqs/) or ask me to open a support ticket!_"
+        )
+        result['reply'] = reply
+        result['intent'] = 'faq_answer'
+        result['matched_faq'] = faq.id
+        save_chat_log(session_id, prompt_clean, reply, intent='faq_answer', metadata={'faq_id': faq.id})
+        return result
+
+
+
+    # 4. Fallback to Movie Recommendation / Cinematic Concierge if query is about watching/movies
+    movie_keywords = ['movie', 'watch', 'show', 'film', 'series', 'recommend', 'sci-fi', 'action', 'thriller', 'comedy', 'drama', 'anime', 'vibe']
+    is_movie_query = any(k in prompt_clean.lower() for k in movie_keywords)
+
+    if is_movie_query and all_movies is not None:
+        rec_movies = []
+        for m in all_movies:
+            # Simple keyword match
+            if any(k in m.description.lower() or k in m.title.lower() for k in prompt_clean.lower().split()):
+                rec_movies.append(m)
+        if not rec_movies:
+            rec_movies = list(all_movies[:3])
+
+        rec_titles = [m.title for m in rec_movies[:3]]
+        rec_ids = [m.id for m in rec_movies[:3]]
+        reply = (
+            f"🎬 Here are my top cinematic recommendations for you:\n\n"
+            f"• **{rec_titles[0]}** - Highly rated for this vibe!\n"
+            + ("\n".join([f"• **{t}**" for t in rec_titles[1:]])) +
+            f"\n\nEnjoy your stream on StreamFlix!"
+        )
+        result['reply'] = reply
+        result['intent'] = 'movie_recommendation'
+        result['recommended_ids'] = rec_ids
+        save_chat_log(session_id, prompt_clean, reply, intent='movie_recommendation', metadata={'rec_ids': rec_ids})
+        return result
+
+    # 5. General unanswerable fallback -> create ticket or offer help
+    ticket = create_support_ticket_from_prompt(prompt_clean, session_key=session_id)
+    reply = (
+        f"🤖 I searched our FAQ and system documentation, but couldn't find a direct answer to: *\"{prompt_clean}\"*.\n\n"
+        f"To ensure you get help right away, I have automatically created a support ticket for our developer support team:\n\n"
+        f"• **Ticket Reference:** `{ticket.ticket_id}`\n"
+        f"• **Priority:** `{ticket.priority}`\n"
+        f"• **Logged:** Database records & MongoDB audit trail\n\n"
+        f"You can also explore our [FAQ Page](/faqs/) or inspect [System Error Codes](/error-codes/)."
+    )
+    result['reply'] = reply
+    result['intent'] = 'ticket_escalation'
+    result['ticket_id'] = ticket.ticket_id
+    save_chat_log(session_id, prompt_clean, reply, intent='ticket_escalation', metadata={'ticket_id': ticket.ticket_id})
+    return result

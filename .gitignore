@@ -21,3 +21,9 @@ staticfiles/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Secrets and local fallback stores
+.env
+*.env
+mongo_chat_logs_fallback.json
+mongo_feedback_fallback.json

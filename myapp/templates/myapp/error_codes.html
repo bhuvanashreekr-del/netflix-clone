@@ -1,0 +1,53 @@
+{% extends 'myapp/base.html' %}
+
+{% block content %}
+<div class="content-container" style="max-width: 1100px; margin: 40px auto; padding: 20px;">
+  
+  <div style="text-align: center; margin-bottom: 40px;">
+    <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; padding: 6px 14px; border-radius: 20px; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">Developer & System Reference</span>
+    <h1 style="font-size: 2.5rem; font-weight: 800; margin-top: 15px; color: #fff;">System & HTTP Error Codes</h1>
+    <p style="color: #a3a3a3; font-size: 1.1rem; max-width: 700px; margin: 10px auto;">
+      Comprehensive documentation of 8 system error codes (400, 401, 403, 404, 429, 500, 503, and proprietary FLIX-402). 
+      Click any card to ask the AI assistant for troubleshooting assistance.
+    </p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
+    {% for err in error_codes %}
+      <div style="background: #181818; border: 1px solid {% if err.is_site_specific %}rgba(229, 9, 20, 0.5){% else %}#262626{% endif %}; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s;" class="error-card">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+            <div style="font-size: 2rem; font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; color: {% if err.is_site_specific %}#E50914{% elif '5' in err.code %}#f87171{% else %}#fbbf24{% endif %};">
+              {{ err.code }}
+            </div>
+            <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; background: {% if err.is_site_specific %}rgba(229, 9, 20, 0.2); color: #E50914; border: 1px solid #E50914;{% else %}#222; color: #aaa;{% endif %}">
+              {% if err.is_site_specific %}Site-Specific{% else %}{{ err.category }}{% endif %}
+            </span>
+          </div>
+
+          <h3 style="font-size: 1.25rem; font-weight: 800; color: #fff; margin-bottom: 8px;">{{ err.title }}</h3>
+          <p style="color: #aaa; font-size: 0.9rem; line-height: 1.6; margin-bottom: 16px;">{{ err.description }}</p>
+
+          <div style="background: #101010; border-radius: 8px; padding: 12px; margin-bottom: 12px; font-size: 0.85rem;">
+            <strong style="color: #ddd;">Common Causes:</strong>
+            <p style="color: #888; margin-top: 4px; line-height: 1.5;">{{ err.common_causes }}</p>
+          </div>
+
+          <div style="background: #101010; border-radius: 8px; padding: 12px; font-size: 0.85rem;">
+            <strong style="color: #4ade80;">Resolution:</strong>
+            <p style="color: #888; margin-top: 4px; line-height: 1.5; white-space: pre-line;">{{ err.troubleshooting }}</p>
+          </div>
+        </div>
+
+        <div style="margin-top: 20px; padding-top: 14px; border-top: 1px solid #242424;">
+          <button onclick="openFlixAiAssistant('Explain Error {{ err.code }} ({{ err.title }}) and give me specific troubleshooting steps')" 
+                  style="width: 100%; background: rgba(229, 9, 20, 0.15); border: 1px solid rgba(229, 9, 20, 0.4); color: #ff5252; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: 0.2s;">
+            🤖 Ask AI to Diagnose Error {{ err.code }}
+          </button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

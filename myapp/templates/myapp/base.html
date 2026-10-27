@@ -27,6 +27,18 @@
         <li class="nav-item {% if active_nav == 'my_list' %}active{% endif %}">
           <a href="{% url 'my_list' %}">My List</a>
         </li>
+        <li class="nav-item">
+          <a href="{% url 'faqs' %}">FAQs</a>
+        </li>
+        <li class="nav-item">
+          <a href="{% url 'error_codes' %}">Error Codes</a>
+        </li>
+        <li class="nav-item">
+          <a href="{% url 'support' %}">Support</a>
+        </li>
+        <li class="nav-item">
+          <a href="{% url 'health' %}">Health</a>
+        </li>
         <li class="nav-item {% if active_nav == 'ai_assistant' %}active{% endif %}">
           <a href="{% url 'ai_assistant' %}" style="color: #c084fc; font-weight: 700;">✨ FlixAI Concierge</a>
         </li>
@@ -507,6 +519,34 @@
         flixDrawer.classList.remove('open');
       }
     });
-  </script>
+  
+    window.openFlixAiAssistant = function(initialPrompt) {
+      const drawer = document.getElementById('flixAiDrawer');
+      const overlay = document.getElementById('flixAiOverlay');
+      if (drawer) drawer.classList.add('active');
+      if (overlay) overlay.classList.add('active');
+      if (initialPrompt) {
+        setTimeout(() => {
+          sendAiPrompt(initialPrompt);
+        }, 300);
+      }
+    };
+
+    window.submitMongoFeedback = function(rating) {
+      fetch('/api/feedback/submit/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating: rating, comment: 'Quick feedback from chat drawer' })
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert('Thank you! Feedback recorded into MongoDB.');
+      })
+      .catch(err => {
+        console.log('Feedback logged locally');
+      });
+    };
+
+</script>
 </body>
 </html>

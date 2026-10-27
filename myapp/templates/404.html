@@ -1,0 +1,38 @@
+{% extends 'myapp/base.html' %}
+
+{% block content %}
+<div style="min-height: 70vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; text-align: center;">
+  <div style="max-width: 650px; background: rgba(20, 20, 20, 0.9); border: 1px solid #333; border-radius: 16px; padding: 48px 32px; box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
+    
+    <div style="font-family: 'Bebas Neue', sans-serif; font-size: 6.5rem; letter-spacing: 4px; color: #E50914; line-height: 1;">
+      404
+    </div>
+    
+    <h1 style="font-size: 2rem; font-weight: 800; color: #fff; margin: 12px 0;">Lost in the Stream?</h1>
+    
+    <p style="color: #aaa; font-size: 1.1rem; line-height: 1.6; margin-bottom: 30px;">
+      Sorry, we couldn't find the page or title at <code style="color: #fca5a5; background: #261616; padding: 3px 8px; border-radius: 4px;">{{ requested_path }}</code>. 
+      It may have expired or moved to another universe.
+    </p>
+
+    <!-- Requirement: "Custom 404 and 500 pages with an 'Ask the assistant' option" -->
+    <div style="display: flex; flex-direction: column; gap: 14px; max-width: 400px; margin: 0 auto;">
+      <button onclick="openFlixAiAssistant('Explain why I got a 404 Not Found error on {{ requested_path|escapejs }} and help me find what I need!')" 
+              style="background: #E50914; color: #fff; border: none; padding: 16px 24px; border-radius: 8px; font-weight: 800; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 20px rgba(229, 9, 20, 0.5); transition: 0.2s;">
+        <span>🤖</span>
+        <span>Ask the Assistant for Help</span>
+      </button>
+
+      <a href="{% url 'home' %}" 
+         style="background: #2a2a2a; color: #fff; text-decoration: none; padding: 14px 24px; border-radius: 8px; font-weight: 700; font-size: 0.95rem; transition: 0.2s;">
+        StreamFlix Home
+      </a>
+
+      <a href="{% url 'error_codes' %}" style="color: #888; font-size: 0.85rem; text-decoration: underline; margin-top: 6px;">
+        Read Error 404 Technical Documentation
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

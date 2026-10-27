@@ -88,3 +88,104 @@ class Review(models.Model):
 
     def __str__(self):
         return f"{self.user_name} on {self.movie.title} ({self.rating}/5)"
+
+
+class FAQ(models.Model):
+    CATEGORY_CHOICES = [
+        ('general', 'General & Account'),
+        ('streaming', 'Streaming & Quality'),
+        ('billing', 'Billing & Subscriptions'),
+        ('troubleshooting', 'Troubleshooting & Errors'),
+        ('ai_concierge', 'FlixAI Assistant'),
+    ]
+
+    question = models.CharField(max_length=300)
+    answer = models.TextField()
+    category = models.CharField(max_length=30, choices=CATEGORY_CHOICES, default='general')
+    order = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', 'category', 'id']
+        verbose_name = 'FAQ'
+        verbose_name_plural = 'FAQs'
+
+    def __str__(self):
+        return self.question
+
+
+class ErrorCode(models.Model):
+    code = models.CharField(max_length=20, unique=True)
+    title = models.CharField(max_length=120)
+    category = models.CharField(max_length=30, default='HTTP Client Error')
+    description = models.TextField()
+    common_causes = models.TextField()
+    troubleshooting = models.TextField()
+    is_site_specific = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['code']
+        verbose_name = 'Error Code'
+        verbose_name_plural = 'Error Codes'
+
+    def __str__(self):
+        return f'{self.code} - {self.title}'
+
+
+class SupportTicket(models.Model):
+    STATUS_CHOICES = [
+        ('OPEN', 'Open'),
+        ('IN_PROGRESS', 'In Progress'),
+        ('RESOLVED', 'Resolved'),
+        ('CLOSED', 'Closed'),
+    ]
+    PRIORITY_CHOICES = [
+        ('LOW', 'Low'),
+        ('MEDIUM', 'Medium'),
+        ('HIGH', 'High'),
+        ('URGENT', 'Urgent'),
+    ]
+
+    ticket_id = models.CharField(max_length=30, unique=True, blank=True)
+    name = models.CharField(max_length=120, default='Streaming User')
+    email = models.EmailField(default='support-request@example.com')
+    subject = models.CharField(max_length=200)
+    description = models.TextField()
+    error_code = models.CharField(max_length=20, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='OPEN')
+    priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='MEDIUM')
+    created_by_ai = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def save(self, *args, **kwargs):
+        if not self.ticket_id:
+            import random, time
+            timestamp = int(time.time()) % 100000
+            rand = random.randint(100, 999)
+            self.ticket_id = f'TICK-{timestamp}{rand}'
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f'[{self.ticket_id}] {self.subject} ({self.status})'
+
+
+class RequestLog(models.Model):
+    path = models.CharField(max_length=300)
+    method = models.CharField(max_length=10)
+    status_code = models.IntegerField()
+    duration_ms = models.FloatField(default=0.0)
+    ip_address = models.CharField(max_length=60, default='127.0.0.1')
+    user_agent = models.CharField(max_length=300, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f'{self.method} {self.path} -> {self.status_code} ({self.duration_ms:.1f}ms)'
