@@ -8,7 +8,7 @@
   <div class="billboard-vignette"></div>
 
   <div class="billboard-content">
-    <div class="original-badge" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: 0.85rem; letter-spacing: 2px; color: #fff; margin-bottom: 12px; background: rgba(0,0,0,0.6); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(229, 9, 20, 0.4);">
+    <div class="original-badge">
       <span style="color: #E50914;">★</span> STREAMFLIX FAMILY &amp; SCIENCE SHOWCASE
     </div>
 
@@ -61,9 +61,10 @@
       <div class="rail-slider" id="slider-top10">
         {% for movie in top_10_movies %}
         <div class="top10-card-wrapper" onclick="openDetailModal({{ movie.id }})">
-          <div class="top10-rank-number">{{ movie.top_10_rank }}</div>
-          <div class="top10-card-inner">
+          <div class="top10-rank top10-rank-number">{{ movie.top_10_rank }}</div>
+          <div class="top10-poster top10-card-inner">
             <img src="{{ movie.thumbnail_url }}" alt="{{ movie.title }}" loading="lazy">
+            <div class="card-caption">{{ movie.title }}</div>
             <div class="card-hover-info">
               <div class="hover-actions">
                 <button class="action-circle-btn play" title="Play Trailer" onclick="event.stopPropagation(); openVideoModal('{{ movie.trailer_youtube_id }}')">▶</button>
@@ -99,6 +100,7 @@
         <div class="movie-card" onclick="openDetailModal({{ movie.id }})">
           <img src="{{ movie.backdrop_url }}" alt="{{ movie.title }}" loading="lazy">
           <span class="card-badge">4K</span>
+          <div class="card-caption">{{ movie.title }}</div>
           <div class="card-hover-info">
             <div class="hover-actions">
               <button class="action-circle-btn play" title="Play Trailer" onclick="event.stopPropagation(); openVideoModal('{{ movie.trailer_youtube_id }}')">▶</button>
@@ -125,17 +127,18 @@
   </section>
   {% endif %}
 
-  <!-- ROW 3: FAMILY & WHOLESOME ANIMATION -->
+  <!-- ROW 3: WHOLESOME FAMILY ANIMATION -->
   {% if family_movies %}
   <section class="rail-section">
-    <h2 class="rail-title">Family &amp; Wholesome Adventures 🌟</h2>
+    <h2 class="rail-title">Wholesome Family Animation 🎈</h2>
     <div class="rail-container">
       <button class="slider-arrow left" data-slider="slider-family">‹</button>
       <div class="rail-slider" id="slider-family">
         {% for movie in family_movies %}
         <div class="movie-card" onclick="openDetailModal({{ movie.id }})">
           <img src="{{ movie.backdrop_url }}" alt="{{ movie.title }}" loading="lazy">
-          <span class="card-badge" style="background: #2563eb;">FAMILY</span>
+          <span class="card-badge">HD</span>
+          <div class="card-caption">{{ movie.title }}</div>
           <div class="card-hover-info">
             <div class="hover-actions">
               <button class="action-circle-btn play" title="Play Trailer" onclick="event.stopPropagation(); openVideoModal('{{ movie.trailer_youtube_id }}')">▶</button>
@@ -162,17 +165,18 @@
   </section>
   {% endif %}
 
-  <!-- ROW 4: SCIENCE, INVENTIONS & GENIUSES -->
+  <!-- ROW 4: SCIENCE, GENIUSES & ROCKETRY -->
   {% if genius_movies %}
   <section class="rail-section">
-    <h2 class="rail-title">Science, Inventions &amp; True Geniuses 🔬</h2>
+    <h2 class="rail-title">Science, Geniuses &amp; Rocketry 🧪</h2>
     <div class="rail-container">
       <button class="slider-arrow left" data-slider="slider-genius">‹</button>
       <div class="rail-slider" id="slider-genius">
         {% for movie in genius_movies %}
         <div class="movie-card" onclick="openDetailModal({{ movie.id }})">
           <img src="{{ movie.backdrop_url }}" alt="{{ movie.title }}" loading="lazy">
-          <span class="card-badge" style="background: #16a34a;">SCIENCE</span>
+          <span class="card-badge">4K</span>
+          <div class="card-caption">{{ movie.title }}</div>
           <div class="card-hover-info">
             <div class="hover-actions">
               <button class="action-circle-btn play" title="Play Trailer" onclick="event.stopPropagation(); openVideoModal('{{ movie.trailer_youtube_id }}')">▶</button>
@@ -199,17 +203,18 @@
   </section>
   {% endif %}
 
-  <!-- ROW 5: NATURE & LIVING WORLD -->
+  <!-- ROW 5: LIVING EARTH & NATURE -->
   {% if nature_movies %}
   <section class="rail-section">
-    <h2 class="rail-title">Nature &amp; Living World Wonders 🌿</h2>
+    <h2 class="rail-title">Living Earth &amp; Nature 🌿</h2>
     <div class="rail-container">
       <button class="slider-arrow left" data-slider="slider-nature">‹</button>
       <div class="rail-slider" id="slider-nature">
         {% for movie in nature_movies %}
         <div class="movie-card" onclick="openDetailModal({{ movie.id }})">
           <img src="{{ movie.backdrop_url }}" alt="{{ movie.title }}" loading="lazy">
-          <span class="card-badge" style="background: #0284c7;">NATURE</span>
+          <span class="card-badge">HDR</span>
+          <div class="card-caption">{{ movie.title }}</div>
           <div class="card-hover-info">
             <div class="hover-actions">
               <button class="action-circle-btn play" title="Play Trailer" onclick="event.stopPropagation(); openVideoModal('{{ movie.trailer_youtube_id }}')">▶</button>
