@@ -1,7 +1,10 @@
+import json
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from .models import Genre, Movie, Watchlist, Review
+from .ai_engine import analyze_user_prompt, get_mood_movies, generate_movie_insights, MOOD_PROFILES
 
 def _get_session_key(request):
     if not request.session.session_key:
@@ -41,6 +44,7 @@ def home(request):
         'my_list': my_list,
         'watchlist_ids': watchlist_ids,
         'genres': genres,
+        'mood_profiles': MOOD_PROFILES,
     })
 
 def series_view(request):
@@ -82,6 +86,21 @@ def my_list_view(request):
         'watchlist_ids': watchlist_ids,
     })
 
+def ai_assistant_view(request):
+    watchlist_ids = _get_user_watchlist_ids(request)
+    selected_mood = request.GET.get('mood', 'mind-bending')
+    mood_data = get_mood_movies(selected_mood)
+
+    return render(request, 'myapp/ai_assistant.html', {
+        'page_title': 'FlixAI Movie Concierge - StreamFlix',
+        'active_nav': 'ai_assistant',
+        'mood_profiles': MOOD_PROFILES,
+        'selected_mood': selected_mood,
+        'active_profile': mood_data['profile'],
+        'mood_movies': mood_data['movies'],
+        'watchlist_ids': watchlist_ids,
+    })
+
 def search_view(request):
     query = request.GET.get('q', '').strip()
     watchlist_ids = _get_user_watchlist_ids(request)
@@ -104,6 +123,7 @@ def search_view(request):
         'watchlist_ids': watchlist_ids,
     })
 
+# API Endpoints
 def toggle_watchlist_api(request, movie_id):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=400)
@@ -143,6 +163,7 @@ def movie_detail_api(request, movie_id):
     } for r in reviews]
 
     genres_list = [g.name for g in movie.genres.all()]
+    ai_insights = generate_movie_insights(movie)
 
     return JsonResponse({
         'id': movie.id,
@@ -165,6 +186,7 @@ def movie_detail_api(request, movie_id):
         'is_netflix_original': movie.is_netflix_original,
         'in_watchlist': movie.id in watchlist_ids,
         'reviews': review_data,
+        'ai_insights': ai_insights,
     })
 
 def add_review_api(request, movie_id):
@@ -195,4 +217,47 @@ def add_review_api(request, movie_id):
             'comment': review.comment,
             'created_at': review.created_at.strftime('%b %d, %Y')
         }
+    })
+
+# AI Chat API
+def ai_chat_api(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=400)
+
+    try:
+        if request.content_type == 'application/json':
+            body = json.loads(request.body.decode('utf-8'))
+            prompt = body.get('prompt', '')
+        else:
+            prompt = request.POST.get('prompt', '')
+    except Exception:
+        prompt = request.POST.get('prompt', '')
+
+    prompt = prompt.strip()
+    if not prompt:
+        return JsonResponse({'error': 'Prompt cannot be empty'}, status=400)
+
+    all_movies = Movie.objects.all()
+    ai_result = analyze_user_prompt(prompt, all_movies)
+
+    rec_ids = ai_result.get('recommended_ids', [])
+    recommended_movies = Movie.objects.filter(id__in=rec_ids)
+
+    movies_data = [{
+        'id': m.id,
+        'title': m.title,
+        'tagline': m.tagline,
+        'backdrop_url': m.backdrop_url,
+        'rating': float(m.rating),
+        'match_percentage': m.match_percentage,
+        'duration': m.duration,
+        'trailer_youtube_id': m.trailer_youtube_id,
+        'genres': [g.name for g in m.genres.all()]
+    } for m in recommended_movies]
+
+    return JsonResponse({
+        'success': True,
+        'reply': ai_result.get('reply', 'Here are your personalized recommendations!'),
+        'recommended_movies': movies_data,
+        'count': len(movies_data),
     })
