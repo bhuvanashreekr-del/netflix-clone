@@ -1,7 +1,9 @@
 services:
   - type: web
-    name: django-portfolio
+    name: streamflix-app
     runtime: python
+    plan: free
+    region: singapore
     buildCommand: "./build.sh"
     startCommand: "gunicorn myproject.wsgi:application"
     envVars:

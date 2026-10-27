@@ -11,6 +11,10 @@ A high-performance, full-stack **Netflix Web Application Clone & AI Cinema Conci
 
 ---
 
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/bhuvanashreekr-del/netflix-clone)
+
+
 ## 🌟 Architecture Breakdown: Frontend, Backend & AI
 
 ### 1. 🎨 Frontend Architecture
