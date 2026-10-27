@@ -8,11 +8,9 @@
   <div class="billboard-vignette"></div>
 
   <div class="billboard-content">
-    {% if featured.is_netflix_original %}
-      <div class="original-badge">
-        <span style="font-size: 1.4rem;">🔴</span> STREAMFLIX ORIGINAL
-      </div>
-    {% endif %}
+    <div class="original-badge" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: 0.85rem; letter-spacing: 2px; color: #fff; margin-bottom: 12px; background: rgba(0,0,0,0.6); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(229, 9, 20, 0.4);">
+      <span style="color: #E50914;">★</span> STREAMFLIX FAMILY &amp; SCIENCE SHOWCASE
+    </div>
 
     <h1 class="billboard-title">{{ featured.title }}</h1>
 
@@ -28,14 +26,14 @@
 
     <div class="billboard-actions">
       <button class="btn-netflix btn-play" onclick="openVideoModal('{{ featured.trailer_youtube_id }}')">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
           <polygon points="5 3 19 12 5 21 5 3"></polygon>
         </svg>
-        Play
+        Play Trailer
       </button>
 
       <button class="btn-netflix btn-info" onclick="openDetailModal({{ featured.id }})">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <circle cx="12" cy="12" r="10"></circle>
           <line x1="12" y1="16" x2="12" y2="12"></line>
           <line x1="12" y1="8" x2="12.01" y2="8"></line>
@@ -43,39 +41,18 @@
         More Info
       </button>
 
-      <button class="btn-netflix btn-watchlist-toggle {% if featured.id in watchlist_ids %}active{% endif %}" onclick="toggleWatchlist({{ featured.id }}, this)">
-        {% if featured.id in watchlist_ids %}✓ In List{% else %}+ My List{% endif %}
+      <button class="btn-netflix btn-info" onclick="openFlixAiAssistant('Tell me why {{ featured.title|escapejs }} is great for families and science lovers!')" style="background: rgba(192, 132, 252, 0.25); border: 1px solid rgba(192, 132, 252, 0.5); color: #c084fc;">
+        ✨ AI Review
       </button>
     </div>
   </div>
 </section>
 {% endif %}
 
-<!-- Rails Container -->
-<div class="rails-wrapper">
+<!-- Main Categorized Carousels Area -->
+<div class="main-content-flow" style="position: relative; z-index: 10; margin-top: -90px;">
 
-  <!-- AI Mood Matcher Strip -->
-  <section class="rail-section" style="padding: 0 4%;">
-    <div style="background: linear-gradient(135deg, rgba(147, 51, 234, 0.2) 0%, rgba(229, 9, 20, 0.2) 100%); border: 1px solid rgba(147, 51, 234, 0.35); border-radius: 12px; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
-      <div>
-        <div style="display: flex; align-items: center; gap: 8px; color: #c084fc; font-weight: 800; font-size: 0.9rem; text-transform: uppercase;">
-          <span>✨</span> FlixAI Smart Discovery
-        </div>
-        <h3 style="font-size: 1.3rem; font-weight: 800; margin: 4px 0;">Not sure what to watch? Let AI find your next obsession.</h3>
-        <p style="color: var(--netflix-gray); font-size: 0.9rem; margin: 0;">Tell FlixAI your exact mood, favorite actor, or preferred story tropes.</p>
-      </div>
-      <div style="display: flex; gap: 12px;">
-        <button class="btn-netflix btn-play" onclick="document.getElementById('openFlixAiBtn').click()" style="padding: 8px 18px; font-size: 0.92rem;">
-          💬 Chat with FlixAI
-        </button>
-        <a href="{% url 'ai_assistant' %}" class="btn-netflix btn-info" style="padding: 8px 18px; font-size: 0.92rem; text-decoration: none;">
-          Explore Moods
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Top 10 in India Today -->
+  <!-- ROW 1: TOP 10 IN INDIA TODAY -->
   {% if top_10_movies %}
   <section class="rail-section">
     <h2 class="rail-title">Top 10 in India Today 🔥</h2>
@@ -84,9 +61,24 @@
       <div class="rail-slider" id="slider-top10">
         {% for movie in top_10_movies %}
         <div class="top10-card-wrapper" onclick="openDetailModal({{ movie.id }})">
-          <span class="top10-rank">{{ forloop.counter }}</span>
-          <div class="top10-poster">
+          <div class="top10-rank-number">{{ movie.top_10_rank }}</div>
+          <div class="top10-card-inner">
             <img src="{{ movie.thumbnail_url }}" alt="{{ movie.title }}" loading="lazy">
+            <div class="card-hover-info">
+              <div class="hover-actions">
+                <button class="action-circle-btn play" title="Play Trailer" onclick="event.stopPropagation(); openVideoModal('{{ movie.trailer_youtube_id }}')">▶</button>
+                <button class="action-circle-btn" title="Add to List" onclick="event.stopPropagation(); toggleWatchlist({{ movie.id }}, this)">
+                  {% if movie.id in watchlist_ids %}✓{% else %}+{% endif %}
+                </button>
+                <button class="action-circle-btn" title="More Info" onclick="event.stopPropagation(); openDetailModal({{ movie.id }})">ℹ</button>
+              </div>
+              <div class="hover-title">{{ movie.title }}</div>
+              <div class="hover-meta">
+                <span class="match-score">{{ movie.match_percentage }}%</span>
+                <span class="rating-badge">{{ movie.age_rating }}</span>
+                <span>{{ movie.quality }}</span>
+              </div>
+            </div>
           </div>
         </div>
         {% endfor %}
@@ -96,26 +88,24 @@
   </section>
   {% endif %}
 
-  <!-- Trending Now -->
-  {% if trending_movies %}
+  <!-- ROW 2: SPACE & COSMIC SCIENCE -->
+  {% if space_movies %}
   <section class="rail-section">
-    <h2 class="rail-title">Trending Now</h2>
+    <h2 class="rail-title">Space &amp; Cosmic Science 🚀</h2>
     <div class="rail-container">
-      <button class="slider-arrow left" data-slider="slider-trending">‹</button>
-      <div class="rail-slider" id="slider-trending">
-        {% for movie in trending_movies %}
+      <button class="slider-arrow left" data-slider="slider-space">‹</button>
+      <div class="rail-slider" id="slider-space">
+        {% for movie in space_movies %}
         <div class="movie-card" onclick="openDetailModal({{ movie.id }})">
           <img src="{{ movie.backdrop_url }}" alt="{{ movie.title }}" loading="lazy">
-          {% if movie.is_netflix_original %}
-            <span class="card-badge">N</span>
-          {% endif %}
+          <span class="card-badge">4K</span>
           <div class="card-hover-info">
             <div class="hover-actions">
-              <button class="action-circle-btn play" onclick="event.stopPropagation(); openVideoModal('{{ movie.trailer_youtube_id }}')">▶</button>
-              <button class="action-circle-btn" onclick="event.stopPropagation(); toggleWatchlist({{ movie.id }}, this)">
+              <button class="action-circle-btn play" title="Play Trailer" onclick="event.stopPropagation(); openVideoModal('{{ movie.trailer_youtube_id }}')">▶</button>
+              <button class="action-circle-btn" title="Add to List" onclick="event.stopPropagation(); toggleWatchlist({{ movie.id }}, this)">
                 {% if movie.id in watchlist_ids %}✓{% else %}+{% endif %}
               </button>
-              <button class="action-circle-btn chevron" onclick="event.stopPropagation(); openDetailModal({{ movie.id }})">⌵</button>
+              <button class="action-circle-btn" title="More Info" onclick="event.stopPropagation(); openDetailModal({{ movie.id }})">ℹ</button>
             </div>
             <div class="hover-title">{{ movie.title }}</div>
             <div class="hover-meta">
@@ -130,28 +120,29 @@
         </div>
         {% endfor %}
       </div>
-      <button class="slider-arrow right" data-slider="slider-trending">›</button>
+      <button class="slider-arrow right" data-slider="slider-space">›</button>
     </div>
   </section>
   {% endif %}
 
-  <!-- Sci-Fi Blockbusters -->
-  {% if scifi_movies %}
+  <!-- ROW 3: FAMILY & WHOLESOME ANIMATION -->
+  {% if family_movies %}
   <section class="rail-section">
-    <h2 class="rail-title">Sci-Fi &amp; Cosmic Adventures 🚀</h2>
+    <h2 class="rail-title">Family &amp; Wholesome Adventures 🌟</h2>
     <div class="rail-container">
-      <button class="slider-arrow left" data-slider="slider-scifi">‹</button>
-      <div class="rail-slider" id="slider-scifi">
-        {% for movie in scifi_movies %}
+      <button class="slider-arrow left" data-slider="slider-family">‹</button>
+      <div class="rail-slider" id="slider-family">
+        {% for movie in family_movies %}
         <div class="movie-card" onclick="openDetailModal({{ movie.id }})">
           <img src="{{ movie.backdrop_url }}" alt="{{ movie.title }}" loading="lazy">
+          <span class="card-badge" style="background: #2563eb;">FAMILY</span>
           <div class="card-hover-info">
             <div class="hover-actions">
-              <button class="action-circle-btn play" onclick="event.stopPropagation(); openVideoModal('{{ movie.trailer_youtube_id }}')">▶</button>
-              <button class="action-circle-btn" onclick="event.stopPropagation(); toggleWatchlist({{ movie.id }}, this)">
+              <button class="action-circle-btn play" title="Play Trailer" onclick="event.stopPropagation(); openVideoModal('{{ movie.trailer_youtube_id }}')">▶</button>
+              <button class="action-circle-btn" title="Add to List" onclick="event.stopPropagation(); toggleWatchlist({{ movie.id }}, this)">
                 {% if movie.id in watchlist_ids %}✓{% else %}+{% endif %}
               </button>
-              <button class="action-circle-btn chevron" onclick="event.stopPropagation(); openDetailModal({{ movie.id }})">⌵</button>
+              <button class="action-circle-btn" title="More Info" onclick="event.stopPropagation(); openDetailModal({{ movie.id }})">ℹ</button>
             </div>
             <div class="hover-title">{{ movie.title }}</div>
             <div class="hover-meta">
@@ -159,75 +150,88 @@
               <span class="rating-badge">{{ movie.age_rating }}</span>
               <span>{{ movie.duration }}</span>
             </div>
+            <div class="hover-genres">
+              {% for g in movie.genres.all %}{{ g.name }}{% if not forloop.last %} • {% endif %}{% endfor %}
+            </div>
           </div>
         </div>
         {% endfor %}
       </div>
-      <button class="slider-arrow right" data-slider="slider-scifi">›</button>
+      <button class="slider-arrow right" data-slider="slider-family">›</button>
     </div>
   </section>
   {% endif %}
 
-  <!-- Anime & Animation -->
-  {% if anime_list %}
+  <!-- ROW 4: SCIENCE, INVENTIONS & GENIUSES -->
+  {% if genius_movies %}
   <section class="rail-section">
-    <h2 class="rail-title">Anime Spotlight ⚡</h2>
+    <h2 class="rail-title">Science, Inventions &amp; True Geniuses 🔬</h2>
     <div class="rail-container">
-      <button class="slider-arrow left" data-slider="slider-anime">‹</button>
-      <div class="rail-slider" id="slider-anime">
-        {% for movie in anime_list %}
+      <button class="slider-arrow left" data-slider="slider-genius">‹</button>
+      <div class="rail-slider" id="slider-genius">
+        {% for movie in genius_movies %}
         <div class="movie-card" onclick="openDetailModal({{ movie.id }})">
           <img src="{{ movie.backdrop_url }}" alt="{{ movie.title }}" loading="lazy">
+          <span class="card-badge" style="background: #16a34a;">SCIENCE</span>
           <div class="card-hover-info">
             <div class="hover-actions">
-              <button class="action-circle-btn play" onclick="event.stopPropagation(); openVideoModal('{{ movie.trailer_youtube_id }}')">▶</button>
-              <button class="action-circle-btn" onclick="event.stopPropagation(); toggleWatchlist({{ movie.id }}, this)">
+              <button class="action-circle-btn play" title="Play Trailer" onclick="event.stopPropagation(); openVideoModal('{{ movie.trailer_youtube_id }}')">▶</button>
+              <button class="action-circle-btn" title="Add to List" onclick="event.stopPropagation(); toggleWatchlist({{ movie.id }}, this)">
                 {% if movie.id in watchlist_ids %}✓{% else %}+{% endif %}
               </button>
-              <button class="action-circle-btn chevron" onclick="event.stopPropagation(); openDetailModal({{ movie.id }})">⌵</button>
+              <button class="action-circle-btn" title="More Info" onclick="event.stopPropagation(); openDetailModal({{ movie.id }})">ℹ</button>
             </div>
             <div class="hover-title">{{ movie.title }}</div>
             <div class="hover-meta">
               <span class="match-score">{{ movie.match_percentage }}% Match</span>
               <span class="rating-badge">{{ movie.age_rating }}</span>
+              <span>{{ movie.duration }}</span>
+            </div>
+            <div class="hover-genres">
+              {% for g in movie.genres.all %}{{ g.name }}{% if not forloop.last %} • {% endif %}{% endfor %}
             </div>
           </div>
         </div>
         {% endfor %}
       </div>
-      <button class="slider-arrow right" data-slider="slider-anime">›</button>
+      <button class="slider-arrow right" data-slider="slider-genius">›</button>
     </div>
   </section>
   {% endif %}
 
-  <!-- Action & Thrillers -->
-  {% if action_movies %}
+  <!-- ROW 5: NATURE & LIVING WORLD -->
+  {% if nature_movies %}
   <section class="rail-section">
-    <h2 class="rail-title">Action &amp; Suspense Thrillers 💥</h2>
+    <h2 class="rail-title">Nature &amp; Living World Wonders 🌿</h2>
     <div class="rail-container">
-      <button class="slider-arrow left" data-slider="slider-action">‹</button>
-      <div class="rail-slider" id="slider-action">
-        {% for movie in action_movies %}
+      <button class="slider-arrow left" data-slider="slider-nature">‹</button>
+      <div class="rail-slider" id="slider-nature">
+        {% for movie in nature_movies %}
         <div class="movie-card" onclick="openDetailModal({{ movie.id }})">
           <img src="{{ movie.backdrop_url }}" alt="{{ movie.title }}" loading="lazy">
+          <span class="card-badge" style="background: #0284c7;">NATURE</span>
           <div class="card-hover-info">
             <div class="hover-actions">
-              <button class="action-circle-btn play" onclick="event.stopPropagation(); openVideoModal('{{ movie.trailer_youtube_id }}')">▶</button>
-              <button class="action-circle-btn" onclick="event.stopPropagation(); toggleWatchlist({{ movie.id }}, this)">
+              <button class="action-circle-btn play" title="Play Trailer" onclick="event.stopPropagation(); openVideoModal('{{ movie.trailer_youtube_id }}')">▶</button>
+              <button class="action-circle-btn" title="Add to List" onclick="event.stopPropagation(); toggleWatchlist({{ movie.id }}, this)">
                 {% if movie.id in watchlist_ids %}✓{% else %}+{% endif %}
               </button>
-              <button class="action-circle-btn chevron" onclick="event.stopPropagation(); openDetailModal({{ movie.id }})">⌵</button>
+              <button class="action-circle-btn" title="More Info" onclick="event.stopPropagation(); openDetailModal({{ movie.id }})">ℹ</button>
             </div>
             <div class="hover-title">{{ movie.title }}</div>
             <div class="hover-meta">
               <span class="match-score">{{ movie.match_percentage }}% Match</span>
               <span class="rating-badge">{{ movie.age_rating }}</span>
+              <span>{{ movie.duration }}</span>
+            </div>
+            <div class="hover-genres">
+              {% for g in movie.genres.all %}{{ g.name }}{% if not forloop.last %} • {% endif %}{% endfor %}
             </div>
           </div>
         </div>
         {% endfor %}
       </div>
-      <button class="slider-arrow right" data-slider="slider-action">›</button>
+      <button class="slider-arrow right" data-slider="slider-nature">›</button>
     </div>
   </section>
   {% endif %}

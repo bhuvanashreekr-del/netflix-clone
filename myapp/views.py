@@ -22,16 +22,15 @@ def get_session_watchlist_ids(request):
     return list(Watchlist.objects.filter(session_key=request.session.session_key).values_list('movie_id', flat=True))
 
 def home(request):
-    """Netflix-style billboard hero and categorized carousels."""
+    """Netflix-style billboard hero and categorized carousels for Family & Science."""
     watchlist_ids = get_session_watchlist_ids(request)
     hero_movie = Movie.objects.filter(is_featured_hero=True).first() or Movie.objects.first()
 
-    trending_movies = Movie.objects.filter(is_trending=True)
     top_10_movies = Movie.objects.filter(is_top_10=True).order_by('top_10_rank')[:10]
-    sci_fi_movies = Movie.objects.filter(genres__slug='sci-fi').distinct()
-    action_movies = Movie.objects.filter(genres__slug='action').distinct()
-    drama_movies = Movie.objects.filter(genres__slug='drama').distinct()
-    anime_movies = Movie.objects.filter(genres__slug='anime').distinct()
+    space_movies = Movie.objects.filter(genres__slug__in=['space-astronomy', 'physics-scifi']).distinct()
+    family_movies = Movie.objects.filter(genres__slug__in=['family-animation', 'nature-world']).distinct()
+    genius_movies = Movie.objects.filter(genres__slug__in=['science-geniuses', 'space-astronomy']).distinct()
+    nature_movies = Movie.objects.filter(genres__slug='nature-world').distinct()
 
     # Third-party API quote with fallback
     daily_quote = fetch_external_quote_with_fallback(timeout_seconds=2.0)
@@ -39,17 +38,14 @@ def home(request):
     context = {
         'featured': hero_movie,
         'hero_movie': hero_movie,
-        'trending_movies': trending_movies,
         'top_10_movies': top_10_movies,
-        'scifi_movies': sci_fi_movies,
-        'sci_fi_movies': sci_fi_movies,
-        'action_movies': action_movies,
-        'drama_movies': drama_movies,
-        'anime_list': anime_movies,
-        'anime_movies': anime_movies,
+        'space_movies': space_movies,
+        'family_movies': family_movies,
+        'genius_movies': genius_movies,
+        'nature_movies': nature_movies,
         'watchlist_ids': watchlist_ids,
         'daily_quote': daily_quote,
-        'page_title': 'Home - Watch TV Shows Online, Watch Movies Online'
+        'page_title': 'StreamFlix - Family & Science Cinematic Experience'
     }
     return render(request, 'myapp/home.html', context)
 
@@ -307,7 +303,8 @@ def movie_detail_api(request, movie_id):
         'director': movie.director,
         'thumbnail_url': movie.thumbnail_url,
         'backdrop_url': movie.backdrop_url,
-        'trailer_url': f"https://www.youtube-nocookie.com/embed/{movie.trailer_youtube_id}?autoplay=1&rel=0",
+        'trailer_youtube_id': movie.trailer_youtube_id,
+        'trailer_url': f"https://www.youtube.com/embed/{movie.trailer_youtube_id}?autoplay=1&rel=0",
         'reviews': [{
             'user_name': r.user_name,
             'rating': r.rating,

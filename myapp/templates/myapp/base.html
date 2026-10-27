@@ -311,16 +311,22 @@
 
     // Video Player Modal
     function openVideoModal(youtubeId) {
-      const activeTrailerId = youtubeId || 'YoHD9XEInc0';
+      const activeTrailerId = youtubeId || '2LqzF5WauAw';
       const container = document.getElementById('videoContainer');
-      container.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${activeTrailerId}?autoplay=1&rel=0&modestbranding=1" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`;
-      document.getElementById('videoModal').classList.add('open');
+      container.innerHTML = `<iframe src="https://www.youtube.com/embed/${activeTrailerId}?autoplay=1&rel=0&modestbranding=1" style="width: 100%; height: 100%; border: none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+      const modal = document.getElementById('videoModal');
+      modal.classList.add('open');
+      modal.style.display = 'flex';
     }
 
     function closeVideoModal() {
       const container = document.getElementById('videoContainer');
-      container.innerHTML = '';
-      document.getElementById('videoModal').classList.remove('open');
+      if (container) container.innerHTML = '';
+      const modal = document.getElementById('videoModal');
+      if (modal) {
+        modal.classList.remove('open');
+        modal.style.display = 'none';
+      }
     }
 
     document.getElementById('closeVideoBtn').addEventListener('click', closeVideoModal);
@@ -371,7 +377,7 @@
 
           // Render reviews
           renderReviews(data.reviews);
-          document.getElementById('detailModal').classList.add('open');
+          const dModal = document.getElementById('detailModal'); dModal.classList.add('open'); dModal.style.display = 'flex';
         });
     }
 
@@ -393,7 +399,11 @@
     }
 
     function closeDetailModal() {
-      document.getElementById('detailModal').classList.remove('open');
+      const modal = document.getElementById('detailModal');
+      if (modal) {
+        modal.classList.remove('open');
+        modal.style.display = 'none';
+      }
     }
 
     document.getElementById('closeDetailBtn').addEventListener('click', closeDetailModal);
