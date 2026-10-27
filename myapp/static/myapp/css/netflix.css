@@ -1381,3 +1381,184 @@ h1, h2, h3, h4, h5, h6, p, span, div {
   text-align: left !important;
   display: inline-block !important;
 }
+
+
+/* =========================================================
+   CRITICAL HERO & CARDS VISUAL COLLISION & ALIGNMENT FIXES
+   ========================================================= */
+
+/* Fix Billboard Hero Container - prevent title from hiding behind fixed navbar */
+.billboard-container {
+  position: relative !important;
+  min-height: 600px !important;
+  height: 82vh !important;
+  max-height: 760px !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-end !important;
+  padding: 100px 0 70px 0 !important;
+}
+
+.billboard-content {
+  position: relative !important;
+  z-index: 5 !important;
+  padding: 0 4% !important;
+  max-width: 820px !important;
+  margin-top: 0 !important;
+  text-align: left !important;
+}
+
+.original-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  letter-spacing: 0.12em !important;
+  font-size: 0.82rem !important;
+  font-weight: 800 !important;
+  color: #fff !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+  padding: 6px 14px !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(229, 9, 20, 0.5) !important;
+  margin-bottom: 12px !important;
+  text-align: left !important;
+}
+
+.billboard-title {
+  font-size: clamp(2rem, 4.2vw, 3.5rem) !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.15 !important;
+  margin-bottom: 14px !important;
+  text-align: left !important;
+  text-shadow: 2px 4px 16px rgba(0, 0, 0, 0.95) !important;
+  word-break: break-word !important;
+}
+
+.meta-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+  font-size: 0.92rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 14px !important;
+  text-align: left !important;
+}
+
+.billboard-synopsis {
+  font-size: 1.05rem !important;
+  color: #e5e5e5 !important;
+  line-height: 1.6 !important;
+  margin-bottom: 24px !important;
+  text-align: left !important;
+  text-shadow: 1px 2px 8px rgba(0, 0, 0, 0.9) !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 3 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+.billboard-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 14px !important;
+  flex-wrap: wrap !important;
+  text-align: left !important;
+  margin-bottom: 10px !important;
+}
+
+/* Main Content Flow - zero overlap with billboard */
+.main-content-flow {
+  position: relative !important;
+  z-index: 10 !important;
+  margin-top: 25px !important;
+  padding-bottom: 60px !important;
+}
+
+/* Rail Titles */
+.rail-title {
+  font-size: 1.4rem !important;
+  font-weight: 800 !important;
+  margin-bottom: 14px !important;
+  padding: 0 4% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  text-align: left !important;
+  color: #fff !important;
+  clear: both !important;
+}
+
+/* Card Badge (4K / HD) - moved to top right to avoid collision with play button */
+.card-badge {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  left: auto !important;
+  background: var(--netflix-red) !important;
+  color: #fff !important;
+  font-size: 0.65rem !important;
+  font-weight: 800 !important;
+  padding: 2px 6px !important;
+  border-radius: 3px !important;
+  letter-spacing: 0.05em !important;
+  z-index: 5 !important;
+  pointer-events: none !important;
+  transition: opacity 0.2s ease !important;
+}
+
+.movie-card:hover .card-badge {
+  opacity: 0 !important;
+}
+
+/* Card Hover Card Overlay - clean spacing and visibility */
+.movie-card {
+  min-width: 220px !important;
+  height: 135px !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
+}
+
+.movie-card:hover {
+  overflow: visible !important;
+}
+
+.card-hover-info {
+  background: linear-gradient(180deg, rgba(20,20,20,0) 0%, rgba(20,20,20,0.95) 25%, #141414 100%) !important;
+  padding: 10px 12px !important;
+  border-radius: 0 0 6px 6px !important;
+  gap: 6px !important;
+}
+
+.hover-title {
+  font-size: 0.88rem !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  white-space: normal !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-align: left !important;
+}
+
+/* Action circle buttons inside hover cards */
+.hover-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-bottom: 2px !important;
+}
+
+.action-circle-btn {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  font-size: 0.85rem !important;
+}
