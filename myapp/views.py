@@ -37,12 +37,15 @@ def home(request):
     daily_quote = fetch_external_quote_with_fallback(timeout_seconds=2.0)
 
     context = {
+        'featured': hero_movie,
         'hero_movie': hero_movie,
         'trending_movies': trending_movies,
         'top_10_movies': top_10_movies,
+        'scifi_movies': sci_fi_movies,
         'sci_fi_movies': sci_fi_movies,
         'action_movies': action_movies,
         'drama_movies': drama_movies,
+        'anime_list': anime_movies,
         'anime_movies': anime_movies,
         'watchlist_ids': watchlist_ids,
         'daily_quote': daily_quote,

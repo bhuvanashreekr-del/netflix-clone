@@ -24,20 +24,11 @@
         <li class="nav-item {% if active_nav == 'movies' %}active{% endif %}">
           <a href="{% url 'movies' %}">Movies</a>
         </li>
+        <li class="nav-item">
+          <a href="{% url 'home' %}#trending">New &amp; Popular</a>
+        </li>
         <li class="nav-item {% if active_nav == 'my_list' %}active{% endif %}">
           <a href="{% url 'my_list' %}">My List</a>
-        </li>
-        <li class="nav-item">
-          <a href="{% url 'faqs' %}">FAQs</a>
-        </li>
-        <li class="nav-item">
-          <a href="{% url 'error_codes' %}">Error Codes</a>
-        </li>
-        <li class="nav-item">
-          <a href="{% url 'support' %}">Support</a>
-        </li>
-        <li class="nav-item">
-          <a href="{% url 'health' %}">Health</a>
         </li>
         <li class="nav-item {% if active_nav == 'ai_assistant' %}active{% endif %}">
           <a href="{% url 'ai_assistant' %}" style="color: #c084fc; font-weight: 700;">✨ FlixAI Concierge</a>
@@ -65,9 +56,35 @@
         <span class="badge-dot"></span>
       </button>
 
-      <a href="https://github.com/bhuvanashreekr-del" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
-        <div class="user-avatar" title="Bhuvanashree - GitHub Profile">BK</div>
-      </a>
+      <!-- Netflix Profile & Assessment Links Dropdown -->
+      <div class="user-menu-wrapper" style="position: relative;" id="userMenuWrapper">
+        <div class="user-avatar" id="userMenuToggle" title="Bhuvanashree - Profile & Assessment Services" style="cursor: pointer;">BK</div>
+        <div class="user-dropdown-menu" id="userDropdownMenu" style="display: none; position: absolute; right: 0; top: 44px; background: rgba(18, 18, 18, 0.98); border: 1px solid #333; border-radius: 8px; width: 230px; box-shadow: 0 10px 35px rgba(0,0,0,0.85); z-index: 1000; padding: 8px 0;">
+          <div style="padding: 10px 16px; border-bottom: 1px solid #282828;">
+            <div style="font-weight: 800; font-size: 0.9rem; color: #fff;">Bhuvanashree</div>
+            <div style="font-size: 0.75rem; color: #888;">Software Development Final</div>
+          </div>
+          <a href="{% url 'faqs' %}" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: #ddd; text-decoration: none; font-size: 0.85rem;" onmouseover="this.style.background='#282828'" onmouseout="this.style.background='transparent'">
+            <span>💡</span> <span>Help &amp; FAQs (SQL)</span>
+          </a>
+          <a href="{% url 'error_codes' %}" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: #ddd; text-decoration: none; font-size: 0.85rem;" onmouseover="this.style.background='#282828'" onmouseout="this.style.background='transparent'">
+            <span>⚠️</span> <span>System Error Codes</span>
+          </a>
+          <a href="{% url 'support' %}" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: #ddd; text-decoration: none; font-size: 0.85rem;" onmouseover="this.style.background='#282828'" onmouseout="this.style.background='transparent'">
+            <span>🎫</span> <span>Support Tickets Desk</span>
+          </a>
+          <a href="{% url 'health' %}" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: #ddd; text-decoration: none; font-size: 0.85rem;" onmouseover="this.style.background='#282828'" onmouseout="this.style.background='transparent'">
+            <span>🩺</span> <span>Diagnostics &amp; Health</span>
+          </a>
+          <div style="border-top: 1px solid #282828; margin: 4px 0;"></div>
+          <a href="https://github.com/bhuvanashreekr-del/netflix-clone" target="_blank" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: #aaa; text-decoration: none; font-size: 0.82rem;" onmouseover="this.style.background='#282828'" onmouseout="this.style.background='transparent'">
+            <span>📦</span> <span>GitHub Repository</span>
+          </a>
+          <a href="{% url 'admin:index' %}" target="_blank" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: #aaa; text-decoration: none; font-size: 0.82rem;" onmouseover="this.style.background='#282828'" onmouseout="this.style.background='transparent'">
+            <span>⚙️</span> <span>Django Admin</span>
+          </a>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -202,18 +219,20 @@
 
   <!-- Netflix Footer -->
   <footer class="netflix-footer">
-    <p>Questions? Contact developer: <a href="https://github.com/bhuvanashreekr-del" target="_blank" style="color: #fff;">@bhuvanashreekr-del</a></p>
+    <p>Questions? Contact developer: <a href="https://github.com/bhuvanashreekr-del" target="_blank" style="color: #fff;">@bhuvanashreekr-del</a> or ask <a href="javascript:void(0)" onclick="openFlixAiAssistant()" style="color: #c084fc;">FlixAI Concierge</a></p>
     <div class="footer-links-grid">
-      <a href="{% url 'home' %}">Home</a>
+      <a href="{% url 'faqs' %}">FAQ &amp; Help Center</a>
+      <a href="{% url 'error_codes' %}">System Error Codes</a>
+      <a href="{% url 'support' %}">Support Tickets Desk</a>
+      <a href="{% url 'health' %}">System Diagnostics &amp; Health</a>
       <a href="{% url 'series' %}">TV Shows</a>
       <a href="{% url 'movies' %}">Movies</a>
       <a href="{% url 'my_list' %}">My List</a>
       <a href="{% url 'ai_assistant' %}">FlixAI Movie Concierge</a>
       <a href="https://github.com/bhuvanashreekr-del/netflix-clone" target="_blank">GitHub Repository</a>
-      <a href="#">Help Centre</a>
-      <a href="#">Terms of Use</a>
+      <a href="{% url 'admin:index' %}" target="_blank">Admin Portal</a>
     </div>
-    <p style="font-size: 0.75rem;">© 2026 StreamFlix, Inc. Built with Python, Django &amp; AI by Bhuvanashree.</p>
+    <p style="font-size: 0.75rem;">© 2026 StreamFlix, Inc. Software Development Final Assessment Project by Bhuvanashree.</p>
   </footer>
 
   <!-- Core JavaScript -->
@@ -546,6 +565,22 @@
         console.log('Feedback logged locally');
       });
     };
+
+
+    const userToggle = document.getElementById('userMenuToggle');
+    const userMenu = document.getElementById('userDropdownMenu');
+    const userWrapper = document.getElementById('userMenuWrapper');
+    if (userToggle && userMenu) {
+      userToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        userMenu.style.display = (userMenu.style.display === 'block') ? 'none' : 'block';
+      });
+      document.addEventListener('click', (e) => {
+        if (!userWrapper.contains(e.target)) {
+          userMenu.style.display = 'none';
+        }
+      });
+    }
 
 </script>
 </body>
