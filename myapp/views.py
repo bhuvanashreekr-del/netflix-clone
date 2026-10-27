@@ -124,6 +124,7 @@ def search_view(request):
     })
 
 # API Endpoints
+@csrf_exempt
 def toggle_watchlist_api(request, movie_id):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=400)
@@ -189,6 +190,7 @@ def movie_detail_api(request, movie_id):
         'ai_insights': ai_insights,
     })
 
+@csrf_exempt
 def add_review_api(request, movie_id):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=400)
@@ -220,6 +222,7 @@ def add_review_api(request, movie_id):
     })
 
 # AI Chat API
+@csrf_exempt
 def ai_chat_api(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=400)
