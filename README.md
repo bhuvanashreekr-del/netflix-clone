@@ -2,7 +2,7 @@
 > **Final Assessment in Software Development**  
 > **Student:** Bhuvanashree  
 > **Repository:** [https://github.com/bhuvanashreekr-del/netflix-clone](https://github.com/bhuvanashreekr-del/netflix-clone)  
-> **Live Website (HTTPS):** [https://laws-way-dodge-que.trycloudflare.com](https://laws-way-dodge-que.trycloudflare.com) *(Cloudflare Live Tunnel)*  
+> **Live Website (HTTPS):** [https://streamflix-app.onrender.com](https://streamflix-app.onrender.com)
 
 ---
 

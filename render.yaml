@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: streamflix-bhuvanashree
+    name: streamflix-app
     runtime: python
     plan: free
     region: singapore
