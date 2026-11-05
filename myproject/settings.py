@@ -87,6 +87,8 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 CSRF_TRUSTED_ORIGINS = [
     'https://*.onrender.com',
+    'https://*.trycloudflare.com',
+    'https://*.loca.lt',
     'http://127.0.0.1:8000',
     'http://localhost:8000',
 ]
